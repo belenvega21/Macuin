@@ -1,0 +1,15 @@
+services:
+
+  cliente:
+    build: ./cliente_flask
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./cliente_flask:/app
+
+  admin:
+    build: ./admin_laravel
+    ports:
+      - "8001:80"
+    volumes:
+      - ./admin_laravel:/var/www/html

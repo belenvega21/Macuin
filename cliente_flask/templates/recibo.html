@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Detalle del pedido | Macuin Autopartes</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+<style>
+
+body{
+font-family:'Space Grotesk',sans-serif;
+background:#140909;
+color:white;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- HEADER -->
+
+<header class="sticky top-0 z-50 bg-[#1d0d0d] border-b border-red-900 px-6 py-4">
+
+<div class="flex justify-between items-center">
+
+<h1 class="text-lg font-bold">
+Macuin <span class="text-red-600">Autopartes</span>
+</h1>
+
+<div class="flex items-center gap-2">
+
+<span class="text-xs text-gray-400">
+Taller Vega
+</span>
+
+<span class="material-symbols-outlined text-red-600">
+person
+</span>
+
+</div>
+
+</div>
+
+
+<div class="flex justify-between items-center mt-4">
+
+<div class="flex items-center gap-2">
+
+<a href="/pedidos" class="material-symbols-outlined bg-[#2d1616] border border-red-900 rounded p-1 hover:bg-red-600">
+arrow_back
+</a>
+
+<h2 class="font-bold text-sm">
+Detalle del pedido #12345
+</h2>
+
+</div>
+
+
+<div class="flex gap-2">
+
+<button class="material-symbols-outlined bg-[#2d1616] border border-red-900 rounded p-1 hover:bg-red-600">
+print
+</button>
+
+<button class="material-symbols-outlined bg-red-600 text-white rounded p-1 hover:bg-red-700">
+download
+</button>
+
+</div>
+
+</div>
+
+</header>
+
+
+
+<!-- CONTENIDO -->
+
+<main class="max-w-md mx-auto p-6">
+
+
+<!-- RECIBO -->
+
+<div class="bg-white text-black rounded shadow-xl overflow-hidden">
+
+<div class="h-2 bg-red-600"></div>
+
+
+<div class="p-6">
+
+
+<!-- EMPRESA -->
+
+<div class="flex justify-between border-b pb-4">
+
+<div>
+
+<h3 class="font-bold text-lg">
+Macuin Autopartes
+</h3>
+
+<p class="text-xs text-gray-500">
+Av. de la Luz 550, Querétaro
+</p>
+
+<p class="text-xs text-gray-500">
+Tel: +52 442 780 0516
+</p>
+
+<p class="text-xs text-gray-500">
+soporte@macuin.com
+</p>
+
+</div>
+
+
+<div class="text-right">
+
+<p class="text-xs text-gray-500">
+Recibo
+</p>
+
+<p class="font-bold text-lg">
+#12345
+</p>
+
+</div>
+
+</div>
+
+
+
+<!-- CLIENTE -->
+
+<div class="grid grid-cols-2 gap-4 mt-4">
+
+<div>
+
+<p class="text-xs text-gray-500">
+Cliente
+</p>
+
+<p class="font-semibold">
+Taller "VEGA"
+</p>
+
+<p class="text-xs text-gray-500">
+Calle Montes 508 #47
+</p>
+
+<p class="text-xs text-gray-500">
+Col. La Loma
+</p>
+
+</div>
+
+
+<div class="text-right">
+
+<p class="text-xs text-gray-500">
+Fecha emisión
+</p>
+
+<p class="font-semibold">
+25/01/2026
+</p>
+
+<p class="text-xs text-gray-500">
+14:30 hrs
+</p>
+
+</div>
+
+</div>
+
+
+
+<!-- PRODUCTOS -->
+
+<table class="w-full mt-6 text-sm">
+
+<thead>
+
+<tr class="border-b">
+
+<th class="text-left py-2 text-gray-500 text-xs">
+Producto
+</th>
+
+<th class="text-center text-gray-500 text-xs">
+Cant.
+</th>
+
+<th class="text-right text-gray-500 text-xs">
+Total
+</th>
+
+</tr>
+
+</thead>
+
+
+<tbody>
+
+<tr class="border-b">
+
+<td class="py-3">
+Balatas
+<br>
+<span class="text-xs text-gray-500">
+Cerámicas de Freno
+</span>
+</td>
+
+<td class="text-center">
+2
+</td>
+
+<td class="text-right">
+$1,238.00
+</td>
+
+</tr>
+
+
+<tr class="border-b">
+
+<td class="py-3">
+Alternador
+<br>
+<span class="text-xs text-gray-500">
+12V Remanufacturado
+</span>
+</td>
+
+<td class="text-center">
+1
+</td>
+
+<td class="text-right">
+$2,829.00
+</td>
+
+</tr>
+
+
+<tr>
+
+<td class="py-3">
+Amortiguador
+<br>
+<span class="text-xs text-gray-500">
+Trasero (Par)
+</span>
+</td>
+
+<td class="text-center">
+4
+</td>
+
+<td class="text-right">
+$7,199.00
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+
+
+<!-- TOTALES -->
+
+<div class="mt-6 border-t pt-4">
+
+<div class="flex justify-between text-sm">
+
+<span class="text-gray-500">
+Subtotal
+</span>
+
+<span>
+$11,263.00
+</span>
+
+</div>
+
+
+<div class="flex justify-between text-sm">
+
+<span class="text-gray-500">
+IVA (16%)
+</span>
+
+<span>
+$1,802.08
+</span>
+
+</div>
+
+
+<div class="flex justify-between text-lg font-bold mt-2">
+
+<span>
+TOTAL
+</span>
+
+<span>
+$13,065.08
+</span>
+
+</div>
+
+</div>
+
+
+
+<p class="text-center text-xs text-gray-400 mt-6">
+Este documento es una representación de un pedido digital.
+</p>
+
+
+</div>
+
+</div>
+
+</main>
+
+
+</body>
+</html>

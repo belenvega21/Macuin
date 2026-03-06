@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Macuin Autopartes - Login</title>
+
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+
+<script>
+tailwind.config = {
+darkMode: "class",
+theme: {
+extend: {
+colors: {
+primary:"#ffd900",
+backgroundDark:"#0a0a0a",
+neutralDark:"#1a1a1a",
+accentRed:"#e63946"
+},
+fontFamily:{
+display:["Inter","sans-serif"]
+}
+}
+}
+}
+</script>
+
+<style>
+body{
+font-family:'Inter',sans-serif;
+background:#0a0a0a;
+}
+</style>
+
+</head>
+
+<body class="min-h-screen flex flex-col text-white">
+
+<!-- HEADER -->
+
+<header class="w-full px-10 py-4 flex justify-between items-center border-b border-gray-800">
+
+<div class="flex items-center gap-3">
+
+<span class="material-symbols-outlined text-yellow-400 text-3xl">
+settings_input_component
+</span>
+
+<h1 class="text-xl font-bold uppercase">
+Macuin <span class="text-red-600">Autopartes</span>
+</h1>
+
+</div>
+
+</header>
+
+
+<!-- LOGIN -->
+
+<main class="flex-1 flex items-center justify-center">
+
+<div class="w-full max-w-md bg-neutralDark p-10 rounded-xl shadow-2xl border border-gray-800">
+
+<div class="text-center mb-8">
+
+<h2 class="text-2xl font-bold">Inicio de Sesión</h2>
+
+<p class="text-gray-400 text-sm">
+Portal de clientes
+</p>
+
+</div>
+
+<form method="POST" action="/login" class="space-y-6">
+
+<div>
+<label class="text-sm text-gray-300">Correo electrónico</label>
+
+<input
+type="email"
+name="email"
+required
+class="w-full mt-2 px-4 py-3 bg-black border border-gray-700 rounded-lg focus:ring-2 focus:ring-yellow-400"
+/>
+
+</div>
+
+<div>
+<label class="text-sm text-gray-300">Contraseña</label>
+
+<input
+type="password"
+name="password"
+required
+class="w-full mt-2 px-4 py-3 bg-black border border-gray-700 rounded-lg focus:ring-2 focus:ring-yellow-400"
+/>
+
+</div>
+
+<button
+type="submit"
+class="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 rounded-lg transition">
+
+INGRESAR
+
+</button>
+
+</form>
+
+<div class="mt-6 text-center text-sm">
+
+<a href="#" class="text-gray-400 hover:text-white">
+¿Olvidaste tu contraseña?
+</a>
+
+<br>
+
+<a href="/registro" class="text-yellow-400 font-bold">
+Crear cuenta
+</a>
+
+</div>
+
+</div>
+
+</main>
+
+</body>
+</html>

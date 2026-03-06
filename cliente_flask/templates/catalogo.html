@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Catálogo | Macuin Autopartes</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+<style>
+
+body{
+font-family:'Space Grotesk',sans-serif;
+background:#140909;
+color:white;
+}
+
+.product-card:hover{
+box-shadow:0 0 20px rgba(242,13,13,.35);
+transform:translateY(-4px);
+transition:.25s;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<!-- HEADER -->
+
+<header class="sticky top-0 z-50 bg-[#1d0d0d] border-b border-red-900 px-8 py-4">
+
+<div class="max-w-7xl mx-auto flex items-center justify-between gap-8">
+
+<div class="flex items-center gap-2">
+
+<span class="material-symbols-outlined text-red-600 text-3xl">
+settings_input_component
+</span>
+
+<h1 class="text-xl font-bold">
+Macuin <span class="text-red-600">Autopartes</span>
+</h1>
+
+</div>
+
+
+<!-- BUSCADOR -->
+
+<div class="flex-1 max-w-xl relative">
+
+<span class="material-symbols-outlined absolute left-3 top-3 text-gray-400">
+search
+</span>
+
+<input id="buscador"
+type="text"
+placeholder="Buscar autoparte..."
+class="w-full bg-black border border-red-900 rounded-lg py-2 pl-10 pr-4"
+/>
+
+</div>
+
+
+<!-- CARRITO -->
+
+<div class="flex items-center gap-6">
+
+<button class="relative">
+
+<span class="material-symbols-outlined text-gray-300">
+shopping_cart
+</span>
+
+<span id="contadorCarrito" class="absolute -top-1 -right-1 bg-red-600 text-xs px-1 rounded">
+0
+</span>
+
+</button>
+
+<div class="flex items-center gap-2">
+
+<span class="material-symbols-outlined text-red-600">
+person
+</span>
+
+<span class="text-sm">
+Taller Vega
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+</header>
+
+
+
+<!-- CONTENIDO -->
+
+<main class="max-w-7xl mx-auto p-8">
+
+<div class="flex justify-between items-center mb-8">
+
+<h2 class="text-2xl font-bold">
+Catálogo de Autopartes
+</h2>
+
+<button onclick="abrirFiltros()" class="flex items-center gap-2 bg-[#2d1616] border border-red-900 hover:bg-red-600 px-4 py-2 rounded text-sm">
+
+<span class="material-symbols-outlined text-red-500">
+tune
+</span>
+
+Filtrar
+
+</button>
+
+</div>
+
+
+
+<!-- PRODUCTOS -->
+
+<div id="productos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+<!-- BALATAS -->
+
+<div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4" data-categoria="frenos" data-nombre="balatas">
+
+<img src="{{ url_for('static', filename='img/balatas.webp') }}" class="h-40 mx-auto">
+
+<h3 class="font-semibold mt-3">
+Balatas Cerámicas
+</h3>
+
+<p class="text-green-500 text-xs">En Stock</p>
+
+<p class="font-bold">$619</p>
+
+<button onclick="agregarCarrito()" class="w-full bg-red-600 mt-3 py-2 rounded">
+Agregar
+</button>
+
+</div>
+
+
+<!-- ALTERNADOR -->
+
+<div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4" data-categoria="electricos" data-nombre="alternador">
+
+<img src="{{ url_for('static', filename='img/alternador.jpeg') }}" class="h-40 mx-auto">
+
+<h3 class="font-semibold mt-3">
+Alternador 12V
+</h3>
+
+<p class="text-yellow-400 text-xs">Pocas piezas</p>
+
+<p class="font-bold">$2829</p>
+
+<button onclick="agregarCarrito()" class="w-full bg-red-600 mt-3 py-2 rounded">
+Agregar
+</button>
+
+</div>
+
+
+<!-- AMORTIGUADOR -->
+
+<div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4" data-categoria="suspension" data-nombre="amortiguador">
+
+<img src="{{ url_for('static', filename='img/amortiguador.jpeg') }}" class="h-40 mx-auto">
+
+<h3 class="font-semibold mt-3">
+Amortiguador
+</h3>
+
+<p class="text-green-500 text-xs">En Stock</p>
+
+<p class="font-bold">$1799</p>
+
+<button onclick="agregarCarrito()" class="w-full bg-red-600 mt-3 py-2 rounded">
+Agregar
+</button>
+
+</div>
+
+
+<!-- FILTRO -->
+
+<div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4" data-categoria="filtros" data-nombre="filtro">
+
+<img src="{{ url_for('static', filename='img/filtro.jpg') }}" class="h-40 mx-auto">
+
+<h3 class="font-semibold mt-3">
+Filtro de Aceite
+</h3>
+
+<p class="text-green-500 text-xs">En Stock</p>
+
+<p class="font-bold">$89</p>
+
+<button onclick="agregarCarrito()" class="w-full bg-red-600 mt-3 py-2 rounded">
+Agregar
+</button>
+
+</div>
+
+
+<!-- BUJIAS -->
+
+<div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4" data-categoria="motor" data-nombre="bujias">
+
+<img src="{{ url_for('static', filename='img/bujias.jpeg') }}" class="h-40 mx-auto">
+
+<h3 class="font-semibold mt-3">
+Bujías NGK Iridium
+</h3>
+
+<p class="text-green-500 text-xs">En Stock</p>
+
+<p class="font-bold">$399</p>
+
+<button onclick="agregarCarrito()" class="w-full bg-red-600 mt-3 py-2 rounded">
+Agregar
+</button>
+
+</div>
+
+
+<!-- BATERIA -->
+
+<div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4" data-categoria="electricos" data-nombre="bateria">
+
+<img src="{{ url_for('static', filename='img/bateria.webp') }}" class="h-40 mx-auto">
+
+<h3 class="font-semibold mt-3">
+Batería LTH
+</h3>
+
+<p class="text-green-500 text-xs">En Stock</p>
+
+<p class="font-bold">$2199</p>
+
+<button onclick="agregarCarrito()" class="w-full bg-red-600 mt-3 py-2 rounded">
+Agregar
+</button>
+
+</div>
+
+
+<!-- RADIADOR -->
+
+<div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4 opacity-70" data-categoria="motor" data-nombre="radiador">
+
+<img src="{{ url_for('static', filename='img/radiador.jpeg') }}" class="h-40 mx-auto">
+
+<h3 class="font-semibold mt-3">
+Radiador
+</h3>
+
+<p class="text-red-500 text-xs">Sin Stock</p>
+
+<p class="font-bold">$1269</p>
+
+<button class="w-full bg-gray-700 mt-3 py-2 rounded">
+Avisarme
+</button>
+
+</div>
+
+</div>
+
+</main>
+
+
+
+<!-- PANEL FILTROS -->
+
+<div id="panelFiltros" class="fixed inset-0 bg-black/70 hidden z-50 flex justify-center items-center">
+
+<div class="bg-[#1d0d0d] w-[400px] rounded-lg border border-red-900 p-6 space-y-4">
+
+<div class="flex justify-between items-center">
+
+<h2 class="font-bold flex gap-2">
+
+<span class="material-symbols-outlined text-red-600">
+tune
+</span>
+
+Filtros
+
+</h2>
+
+<button onclick="cerrarFiltros()">
+<span class="material-symbols-outlined">close</span>
+</button>
+
+</div>
+
+
+<label class="flex gap-2">
+<input type="checkbox" value="frenos" class="categoria"> Frenos
+</label>
+
+<label class="flex gap-2">
+<input type="checkbox" value="electricos" class="categoria"> Eléctricos
+</label>
+
+<label class="flex gap-2">
+<input type="checkbox" value="motor" class="categoria"> Motor
+</label>
+
+<label class="flex gap-2">
+<input type="checkbox" value="suspension" class="categoria"> Suspensión
+</label>
+
+<label class="flex gap-2">
+<input type="checkbox" value="filtros" class="categoria"> Filtros
+</label>
+
+
+<button onclick="aplicarFiltros()" class="w-full bg-red-600 py-2 rounded mt-4">
+Aplicar filtros
+</button>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+let carrito=0
+
+function agregarCarrito(){
+carrito++
+document.getElementById("contadorCarrito").innerText=carrito
+}
+
+
+function abrirFiltros(){
+document.getElementById("panelFiltros").classList.remove("hidden")
+}
+
+function cerrarFiltros(){
+document.getElementById("panelFiltros").classList.add("hidden")
+}
+
+
+document.getElementById("buscador").addEventListener("keyup",function(){
+
+let texto=this.value.toLowerCase()
+
+document.querySelectorAll(".product-card").forEach(p=>{
+
+let nombre=p.dataset.nombre
+
+p.style.display=nombre.includes(texto) ? "block" : "none"
+
+})
+
+})
+
+
+function aplicarFiltros(){
+
+let categorias=[...document.querySelectorAll(".categoria:checked")].map(c=>c.value)
+
+document.querySelectorAll(".product-card").forEach(p=>{
+
+if(categorias.length==0){
+p.style.display="block"
+return
+}
+
+p.style.display=categorias.includes(p.dataset.categoria) ? "block":"none"
+
+})
+
+cerrarFiltros()
+
+}
+
+</script>
+
+
+</body>
+</html>

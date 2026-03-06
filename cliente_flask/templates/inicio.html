@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Macuin Autopartes - Inicio</title>
+
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+<script>
+tailwind.config = {
+darkMode: "class",
+theme: {
+extend: {
+colors: {
+primary: "#FFD700",
+redaccent: "#D32F2F",
+darkbg: "#050505",
+cardbg: "#0F0F10",
+inputbg: "#121212",
+borderdark: "#2a2a2a"
+},
+fontFamily: {
+sans: ["Roboto", "sans-serif"],
+tech: ["Chakra Petch", "sans-serif"]
+}
+}
+}
+}
+</script>
+
+<style>
+
+body{
+font-family:'Roboto',sans-serif;
+background:#050505;
+color:white;
+}
+
+.tech{
+font-family:'Chakra Petch',sans-serif;
+}
+
+</style>
+
+</head>
+
+<body class="bg-darkbg min-h-screen flex justify-center">
+
+<div class="w-full max-w-6xl pb-24">
+
+<!-- HEADER -->
+
+<header class="sticky top-0 bg-darkbg border-b border-borderdark px-6 py-4 z-50">
+
+<div class="flex justify-between items-center mb-4">
+
+<h1 class="text-xl font-black uppercase tech">
+Macuin <span class="text-red-600">Autopartes</span>
+</h1>
+
+<div class="flex items-center gap-3 bg-cardbg border border-borderdark px-3 py-1 rounded-full">
+
+<span class="text-xs text-gray-400">
+Taller "Vega"
+</span>
+
+<span class="material-symbols-outlined text-red-600">
+person
+</span>
+
+</div>
+
+</div>
+
+<div class="bg-gradient-to-r from-red-900/40 via-cardbg to-transparent border-l-4 border-red-600 p-3 rounded">
+
+<h2 class="text-sm font-bold tech uppercase">
+Orgullosamente Macuin
+</h2>
+
+<p class="text-xs text-gray-400">
+Expertos en autopartes de alta calidad
+</p>
+
+</div>
+
+<div class="flex gap-2 mt-4">
+
+<input
+type="text"
+placeholder="Buscar autoparte..."
+class="flex-1 bg-inputbg border border-borderdark px-4 py-2 text-sm rounded"
+>
+
+<button class="bg-red-700 px-5 py-2 text-sm font-bold uppercase hover:bg-red-600">
+Buscar
+</button>
+
+</div>
+
+</header>
+
+<!-- CONTENIDO -->
+
+<main class="px-6 py-8 space-y-10">
+
+<!-- MARCAS -->
+
+<section>
+
+<h3 class="text-sm font-bold uppercase tech flex items-center gap-2 mb-4">
+
+<span class="w-1 h-4 bg-red-600"></span>
+Marcas Líderes
+
+</h3>
+
+<div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Duralast_logo.png" class="bg-cardbg p-3 rounded border border-borderdark">
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/6/6c/LTH_logo.png" class="bg-cardbg p-3 rounded border border-borderdark">
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/FRAM_logo.png" class="bg-cardbg p-3 rounded border border-borderdark">
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/LuK_logo.png" class="bg-cardbg p-3 rounded border border-borderdark">
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/e/e6/Total_logo.png" class="bg-cardbg p-3 rounded border border-borderdark">
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Bosch-logo.png" class="bg-cardbg p-3 rounded border border-borderdark">
+
+</div>
+
+</section>
+
+
+<!-- OFERTAS -->
+
+<section>
+
+<div class="flex justify-between items-center mb-4">
+
+<h3 class="text-sm font-bold uppercase tech flex items-center gap-2">
+
+<span class="w-1 h-4 bg-yellow-400"></span>
+Ofertas de la Semana
+
+</h3>
+
+<a href="/catalogo" class="text-xs text-red-500 hover:text-white">
+Ver todo
+</a>
+
+</div>
+
+
+<div class="grid md:grid-cols-2 gap-6">
+
+<!-- PRODUCTO 1 -->
+
+<div class="bg-zinc-900 border border-red-900/40 rounded-xl p-6 relative overflow-hidden">
+
+<img src="https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2"
+class="absolute right-0 top-0 h-full opacity-40">
+
+<div class="relative z-10 max-w-xs">
+
+<div class="bg-primary text-black text-xs font-bold px-3 py-1 rounded mb-3">
+Gran Venta
+</div>
+
+<h4 class="text-3xl font-black uppercase tech mb-2">
+Frenos de Cerámica
+</h4>
+
+<p class="text-xs text-gray-300 mb-5">
+Hasta 30% de descuento
+</p>
+
+<button class="bg-red-600 px-5 py-2 text-xs uppercase font-bold hover:bg-red-500">
+Comprar ahora
+</button>
+
+</div>
+
+</div>
+
+
+<!-- PRODUCTO 2 -->
+
+<div class="bg-zinc-900 border border-red-900/40 rounded-xl p-6 relative overflow-hidden">
+
+<img src="https://images.unsplash.com/photo-1619642751034-765dfdf7c58e"
+class="absolute right-0 top-0 h-full opacity-40">
+
+<div class="relative z-10 max-w-xs">
+
+<div class="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded mb-3">
+Liquidación
+</div>
+
+<h4 class="text-3xl font-black uppercase tech mb-2">
+Aceite Sintético
+</h4>
+
+<p class="text-xs text-gray-300 mb-5">
+4L + Filtro Gratis
+</p>
+
+<button class="bg-white text-black px-5 py-2 text-xs uppercase font-bold hover:bg-gray-200">
+Ver oferta
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+</main>
+
+<!-- MENU INFERIOR -->
+
+<nav class="fixed bottom-0 w-full max-w-6xl bg-darkbg border-t border-borderdark py-3 px-6 flex justify-between">
+
+<a href="/inicio" class="flex flex-col items-center text-red-600">
+
+<span class="material-symbols-outlined text-2xl">home</span>
+<span class="text-xs">Inicio</span>
+
+</a>
+
+
+<a href="/catalogo" class="flex flex-col items-center text-gray-400 hover:text-white">
+
+<span class="material-symbols-outlined text-2xl">grid_view</span>
+<span class="text-xs">Catálogo</span>
+
+</a>
+
+
+<a href="/carrito" class="flex flex-col items-center text-white">
+
+<span class="material-symbols-outlined text-2xl">shopping_cart</span>
+<span class="text-xs">Carrito</span>
+
+</a>
+
+
+<a href="/favoritos" class="flex flex-col items-center text-gray-400 hover:text-white">
+
+<span class="material-symbols-outlined text-2xl">favorite</span>
+<span class="text-xs">Favoritos</span>
+
+</a>
+
+
+<a href="/pedidos" class="flex flex-col items-center text-gray-400 hover:text-white">
+
+<span class="material-symbols-outlined text-2xl">receipt_long</span>
+<span class="text-xs">Pedidos</span>
+
+</a>
+
+</nav>
+
+</div>
+
+<script>
+document.documentElement.classList.add('dark');
+</script>
+
+</body>
+</html>

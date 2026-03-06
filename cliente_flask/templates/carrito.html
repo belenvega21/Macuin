@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Carrito | Macuin Autopartes</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+<style>
+
+body{
+font-family:'Space Grotesk',sans-serif;
+background:#140909;
+color:white;
+}
+
+.cart-item:hover{
+box-shadow:0 0 15px rgba(255,0,0,.3);
+transition:.25s;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- HEADER -->
+
+<header class="sticky top-0 z-50 bg-[#1d0d0d] border-b border-red-900 px-6 py-4">
+
+<div class="flex justify-between items-center">
+
+<h1 class="text-lg font-bold">
+Macuin <span class="text-red-600">Autopartes</span>
+</h1>
+
+<div class="flex items-center gap-2">
+
+<span class="text-xs text-gray-400">
+Taller Vega
+</span>
+
+<span class="material-symbols-outlined text-red-600">
+person
+</span>
+
+</div>
+
+</div>
+
+
+<div class="flex justify-between items-center mt-4">
+
+<div class="flex items-center gap-2">
+
+<a href="/catalogo" class="material-symbols-outlined bg-[#2d1616] border border-red-900 rounded p-1 hover:bg-red-600">
+arrow_back
+</a>
+
+<h2 class="font-bold text-lg">
+Tu carrito <span class="text-red-600">(3)</span>
+</h2>
+
+</div>
+
+<button class="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1">
+
+Vaciar carrito
+
+<span class="material-symbols-outlined text-sm">
+delete
+</span>
+
+</button>
+
+</div>
+
+</header>
+
+
+
+<!-- CONTENIDO -->
+
+<main class="max-w-3xl mx-auto p-6 space-y-4">
+
+
+<!-- ITEM 1 -->
+
+<div class="cart-item bg-[#2d1616] border border-red-900 rounded-lg p-4 flex gap-4 items-center">
+
+<img src="{{ url_for('static', filename='img/balatas.webp') }}" class="h-20 w-20 object-contain bg-black p-2 rounded">
+
+<div class="flex-1">
+
+<p class="text-xs text-gray-400">
+ID: PZ-4002
+</p>
+
+<h3 class="font-semibold">
+Balatas Cerámicas de Freno
+</h3>
+
+<p class="font-bold mt-1">
+$619.00
+</p>
+
+</div>
+
+<div class="flex items-center gap-2">
+
+<button class="bg-black border border-red-900 w-8 h-8 flex justify-center items-center rounded">
+-
+</button>
+
+<span>
+1
+</span>
+
+<button class="bg-black border border-red-900 w-8 h-8 flex justify-center items-center rounded">
++
+</button>
+
+</div>
+
+</div>
+
+
+
+<!-- ITEM 2 -->
+
+<div class="cart-item bg-[#2d1616] border border-red-900 rounded-lg p-4 flex gap-4 items-center">
+
+<img src="{{ url_for('static', filename='img/alternador.jpeg') }}" class="h-20 w-20 object-contain bg-black p-2 rounded">
+
+<div class="flex-1">
+
+<p class="text-xs text-gray-400">
+ID: PZ-4003
+</p>
+
+<h3 class="font-semibold">
+Alternador 12V Remanufacturado
+</h3>
+
+<p class="font-bold mt-1">
+$2,829.00
+</p>
+
+</div>
+
+<div class="flex items-center gap-2">
+
+<button class="bg-black border border-red-900 w-8 h-8 flex justify-center items-center rounded">
+-
+</button>
+
+<span>
+1
+</span>
+
+<button class="bg-black border border-red-900 w-8 h-8 flex justify-center items-center rounded">
++
+</button>
+
+</div>
+
+</div>
+
+
+
+<!-- ITEM 3 -->
+
+<div class="cart-item bg-[#2d1616] border border-red-900 rounded-lg p-4 flex gap-4 items-center">
+
+<img src="{{ url_for('static', filename='img/amortiguador.jpeg') }}" class="h-20 w-20 object-contain bg-black p-2 rounded">
+
+<div class="flex-1">
+
+<p class="text-xs text-gray-400">
+ID: PZ-4004
+</p>
+
+<h3 class="font-semibold">
+Amortiguador Trasero
+</h3>
+
+<p class="font-bold mt-1">
+$1,799.00
+</p>
+
+</div>
+
+<div class="flex items-center gap-2">
+
+<button class="bg-black border border-red-900 w-8 h-8 flex justify-center items-center rounded">
+-
+</button>
+
+<span>
+1
+</span>
+
+<button class="bg-black border border-red-900 w-8 h-8 flex justify-center items-center rounded">
++
+</button>
+
+</div>
+
+</div>
+
+
+
+<!-- RESUMEN -->
+
+<div class="bg-[#1d0d0d] border border-red-900 rounded-lg p-6 mt-8">
+
+<div class="space-y-2 text-sm">
+
+<div class="flex justify-between">
+<span class="text-gray-400">
+Subtotal
+</span>
+<span>
+$5,247.00
+</span>
+</div>
+
+<div class="flex justify-between">
+<span class="text-gray-400">
+IVA (16%)
+</span>
+<span>
+$839.52
+</span>
+</div>
+
+</div>
+
+
+<div class="flex justify-between mt-4 text-xl font-bold">
+
+<span>
+Total
+</span>
+
+<span class="text-red-500">
+$6,086.52
+</span>
+
+</div>
+
+
+<button class="w-full mt-6 bg-red-600 hover:bg-red-700 py-3 rounded font-semibold flex justify-center gap-2">
+
+Finalizar compra
+
+<span class="material-symbols-outlined">
+arrow_forward
+</span>
+
+</button>
+
+</div>
+
+</main>
+
+
+
+<!-- MODAL VALIDACION 
+
+<div class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+
+<div class="bg-[#1d0d0d] border border-red-900 rounded-xl p-6 w-[360px] text-center shadow-[0_0_25px_rgba(255,0,0,0.25)]">
+
+<h2 class="font-bold text-lg mb-2">
+¿Deseas eliminar los productos?
+</h2>
+
+<p class="text-sm text-gray-400 mb-6">
+Esta acción vaciará todo tu carrito de compras.
+¿Deseas continuar?
+</p>
+
+<div class="flex gap-3">
+
+<button class="flex-1 bg-gray-700 hover:bg-gray-600 py-2 rounded">
+Cancelar
+</button>
+
+<button class="flex-1 bg-red-600 hover:bg-red-700 py-2 rounded">
+Eliminar todo
+</button>
+
+</div>-->
+
+</div>
+
+</div>
+
+
+
+</body>
+</html>
