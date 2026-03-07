@@ -288,7 +288,7 @@ Avisarme
 
 <!-- PANEL FILTROS -->
 
-<div id="panelFiltros" class="fixed inset-0 bg-black/70 hidden z-50 flex justify-center items-center">
+<div id="panelFiltros" class="fixed inset-0 bg-black/70 hidden z-50 justify-center items-center">
 
 <div class="bg-[#1d0d0d] w-[400px] rounded-lg border border-red-900 p-6 space-y-4">
 
@@ -353,11 +353,15 @@ document.getElementById("contadorCarrito").innerText=carrito
 
 
 function abrirFiltros(){
-document.getElementById("panelFiltros").classList.remove("hidden")
+const panel = document.getElementById("panelFiltros")
+panel.classList.remove("hidden")
+panel.classList.add("flex")
 }
 
 function cerrarFiltros(){
-document.getElementById("panelFiltros").classList.add("hidden")
+const panel = document.getElementById("panelFiltros")
+panel.classList.add("hidden")
+panel.classList.remove("flex")
 }
 
 
