@@ -1,19 +1,26 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('inicio');
+
+Route::post('/login', function (Request $request) {
+
+    return redirect('/admin');
+})->name('login');
 
 Route::get('/admin', function () {
     return view('admin.dashboard');
-});
+})->name('dashboard'); 
+
 
 Route::get('/login', function () {
     return view('admin.login');
 });
-
+x
 Route::get('/register', function () {
     return view('admin.register');
 });
@@ -45,7 +52,6 @@ Route::get('/clientes', function () {
 Route::get('/historial-cliente', function () {
     return view('admin.historial_cliente');
 });
-
 
 Route::get('/reportes', function () {
     return view('admin.reportes');

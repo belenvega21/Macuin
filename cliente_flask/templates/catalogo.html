@@ -34,13 +34,11 @@ transition:.25s;
 
 <body>
 
-<!-- HEADER -->
-
 <header class="sticky top-0 z-50 bg-[#1d0d0d] border-b border-red-900 px-8 py-4">
 
 <div class="max-w-7xl mx-auto flex items-center justify-between gap-8">
 
-<div class="flex items-center gap-2">
+<a href="{{ url_for('inicio') }}" class="flex items-center gap-2">
 
 <span class="material-symbols-outlined text-red-600 text-3xl">
 settings_input_component
@@ -50,10 +48,8 @@ settings_input_component
 Macuin <span class="text-red-600">Autopartes</span>
 </h1>
 
-</div>
+</a>
 
-
-<!-- BUSCADOR -->
 
 <div class="flex-1 max-w-xl relative">
 
@@ -70,13 +66,11 @@ class="w-full bg-black border border-red-900 rounded-lg py-2 pl-10 pr-4"
 </div>
 
 
-<!-- CARRITO -->
-
 <div class="flex items-center gap-6">
 
-<button class="relative">
+<a href="{{ url_for('carrito') }}" class="relative block">
 
-<span class="material-symbols-outlined text-gray-300">
+<span class="material-symbols-outlined text-gray-300 hover:text-white transition">
 shopping_cart
 </span>
 
@@ -84,9 +78,9 @@ shopping_cart
 0
 </span>
 
-</button>
+</a>
 
-<div class="flex items-center gap-2">
+<div class="flex items-center gap-2 cursor-pointer">
 
 <span class="material-symbols-outlined text-red-600">
 person
@@ -105,8 +99,6 @@ Taller Vega
 </header>
 
 
-
-<!-- CONTENIDO -->
 
 <main class="max-w-7xl mx-auto p-8">
 
@@ -130,11 +122,7 @@ Filtrar
 
 
 
-<!-- PRODUCTOS -->
-
 <div id="productos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-
-<!-- BALATAS -->
 
 <div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4" data-categoria="frenos" data-nombre="balatas">
 
@@ -155,8 +143,6 @@ Agregar
 </div>
 
 
-<!-- ALTERNADOR -->
-
 <div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4" data-categoria="electricos" data-nombre="alternador">
 
 <img src="{{ url_for('static', filename='img/alternador.jpeg') }}" class="h-40 mx-auto">
@@ -175,8 +161,6 @@ Agregar
 
 </div>
 
-
-<!-- AMORTIGUADOR -->
 
 <div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4" data-categoria="suspension" data-nombre="amortiguador">
 
@@ -197,8 +181,6 @@ Agregar
 </div>
 
 
-<!-- FILTRO -->
-
 <div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4" data-categoria="filtros" data-nombre="filtro">
 
 <img src="{{ url_for('static', filename='img/filtro.jpg') }}" class="h-40 mx-auto">
@@ -217,8 +199,6 @@ Agregar
 
 </div>
 
-
-<!-- BUJIAS -->
 
 <div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4" data-categoria="motor" data-nombre="bujias">
 
@@ -239,8 +219,6 @@ Agregar
 </div>
 
 
-<!-- BATERIA -->
-
 <div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4" data-categoria="electricos" data-nombre="bateria">
 
 <img src="{{ url_for('static', filename='img/bateria.webp') }}" class="h-40 mx-auto">
@@ -259,8 +237,6 @@ Agregar
 
 </div>
 
-
-<!-- RADIADOR -->
 
 <div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4 opacity-70" data-categoria="motor" data-nombre="radiador">
 
@@ -285,8 +261,6 @@ Avisarme
 </main>
 
 
-
-<!-- PANEL FILTROS -->
 
 <div id="panelFiltros" class="fixed inset-0 bg-black/70 hidden z-50 justify-center items-center">
 

@@ -55,15 +55,15 @@ font-family:'Chakra Petch',sans-serif;
 
 <div class="w-full max-w-6xl pb-24">
 
-<!-- HEADER -->
-
 <header class="sticky top-0 bg-darkbg border-b border-borderdark px-6 py-4 z-50">
 
 <div class="flex justify-between items-center mb-4">
 
-<h1 class="text-xl font-black uppercase tech">
-Macuin <span class="text-red-600">Autopartes</span>
-</h1>
+<a href="{{ url_for('inicio') }}">
+    <h1 class="text-xl font-black uppercase tech">
+    Macuin <span class="text-red-600">Autopartes</span>
+    </h1>
+</a>
 
 <div class="flex items-center gap-3 bg-cardbg border border-borderdark px-3 py-1 rounded-full">
 
@@ -107,11 +107,7 @@ Buscar
 
 </header>
 
-<!-- CONTENIDO -->
-
 <main class="px-6 py-8 space-y-10">
-
-<!-- MARCAS -->
 
 <section>
 
@@ -141,8 +137,6 @@ Marcas Líderes
 </section>
 
 
-<!-- OFERTAS -->
-
 <section>
 
 <div class="flex justify-between items-center mb-4">
@@ -154,7 +148,7 @@ Ofertas de la Semana
 
 </h3>
 
-<a href="/catalogo" class="text-xs text-red-500 hover:text-white">
+<a href="{{ url_for('catalogo') }}" class="text-xs text-red-500 hover:text-white">
 Ver todo
 </a>
 
@@ -162,8 +156,6 @@ Ver todo
 
 
 <div class="grid md:grid-cols-2 gap-6">
-
-<!-- PRODUCTO 1 -->
 
 <div class="bg-zinc-900 border border-red-900/40 rounded-xl p-6 relative overflow-hidden">
 
@@ -192,8 +184,6 @@ Comprar ahora
 
 </div>
 
-
-<!-- PRODUCTO 2 -->
 
 <div class="bg-zinc-900 border border-red-900/40 rounded-xl p-6 relative overflow-hidden">
 
@@ -228,11 +218,9 @@ Ver oferta
 
 </main>
 
-<!-- MENU INFERIOR -->
+<nav class="fixed bottom-0 w-full max-w-6xl bg-darkbg border-t border-borderdark py-3 px-6 flex justify-between z-50">
 
-<nav class="fixed bottom-0 w-full max-w-6xl bg-darkbg border-t border-borderdark py-3 px-6 flex justify-between">
-
-<a href="/inicio" class="flex flex-col items-center text-red-600">
+<a href="{{ url_for('inicio') }}" class="flex flex-col items-center text-red-600">
 
 <span class="material-symbols-outlined text-2xl">home</span>
 <span class="text-xs">Inicio</span>
@@ -240,7 +228,7 @@ Ver oferta
 </a>
 
 
-<a href="/catalogo" class="flex flex-col items-center text-gray-400 hover:text-white">
+<a href="{{ url_for('catalogo') }}" class="flex flex-col items-center text-gray-400 hover:text-white">
 
 <span class="material-symbols-outlined text-2xl">grid_view</span>
 <span class="text-xs">Catálogo</span>
@@ -248,7 +236,7 @@ Ver oferta
 </a>
 
 
-<a href="/carrito" class="flex flex-col items-center text-white">
+<a href="{{ url_for('carrito') }}" class="flex flex-col items-center text-gray-400 hover:text-white">
 
 <span class="material-symbols-outlined text-2xl">shopping_cart</span>
 <span class="text-xs">Carrito</span>
@@ -256,7 +244,7 @@ Ver oferta
 </a>
 
 
-<a href="/favoritos" class="flex flex-col items-center text-gray-400 hover:text-white">
+<a href="#" class="flex flex-col items-center text-gray-400 hover:text-white">
 
 <span class="material-symbols-outlined text-2xl">favorite</span>
 <span class="text-xs">Favoritos</span>
@@ -264,7 +252,7 @@ Ver oferta
 </a>
 
 
-<a href="/pedidos" class="flex flex-col items-center text-gray-400 hover:text-white">
+<a href="{{ url_for('pedidos') }}" class="flex flex-col items-center text-gray-400 hover:text-white">
 
 <span class="material-symbols-outlined text-2xl">receipt_long</span>
 <span class="text-xs">Pedidos</span>
