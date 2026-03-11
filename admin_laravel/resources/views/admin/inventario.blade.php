@@ -79,7 +79,6 @@ Inventario
 
 
 
-<!-- CONTENIDO -->
 
 <main class="flex-1 p-10 overflow-y-auto">
 
@@ -92,7 +91,6 @@ Inventario / Catálogo de Autopartes
 
 
 
-<!-- BUSCADOR -->
 
 <input
 type="text"
@@ -133,8 +131,7 @@ class="w-full bg-black/40 border border-white/10 rounded p-3 mb-6">
 <td class="p-4">#4092</td>
 
 <td class="p-4">
-<img src="https://via.placeholder.com/40" class="rounded">
-</td>
+<img src="{{ asset('images/balatas.avif') }}" class="w-10 h-10 object-cover rounded"></td>
 
 <td class="p-4">Balatas Cerámicas</td>
 <td class="p-4">Duralast</td>
@@ -170,9 +167,7 @@ delete
 <td class="p-4">#4093</td>
 
 <td class="p-4">
-<img src="https://via.placeholder.com/40" class="rounded">
-</td>
-
+<img src="{{ asset('images/alternador.jpeg') }}" class="w-10 h-10 object-cover rounded">
 <td class="p-4">Alternador 12V</td>
 <td class="p-4">Bosch</td>
 <td class="p-4">Eléctrico</td>

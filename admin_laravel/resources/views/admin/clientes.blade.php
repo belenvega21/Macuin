@@ -60,7 +60,6 @@ border:1px solid rgba(255,255,255,0.08);
 <div class="flex h-screen">
 
 
-<!-- SIDEBAR -->
 
 <aside class="w-64 bg-black border-r border-white/10 flex flex-col">
 
@@ -100,7 +99,6 @@ Clientes
 </aside>
 
 
-<!-- CONTENIDO -->
 
 <main class="flex-1 p-8 overflow-y-auto">
 
@@ -116,7 +114,6 @@ Directorio / Clientes
 <div class="grid grid-cols-12 gap-6 h-[80vh]">
 
 
-<!-- LISTA CLIENTES -->
 
 <div class="col-span-4 glass-panel rounded-xl p-4 overflow-y-auto">
 
@@ -147,7 +144,7 @@ class="w-full mb-4 bg-black/40 border border-white/10 rounded p-2 text-sm">
 
 <div class="p-3 bg-white/5 rounded hover:bg-white/10 cursor-pointer">
 
-<p>Motores del Pacífico</p>
+<p>Motores del Victor</p>
 <p class="text-xs text-gray-400">ID: CLI-9402</p>
 
 </div>

@@ -219,11 +219,12 @@ Ingresos y proyecciones
 <input type="date" class="bg-black/40 border border-white/10 rounded p-2 mb-5 text-sm">
 
 
-<button class="bg-yellow text-black font-bold py-3 rounded">
 
+
+<a href="/reporte-general" class="bg-yellow text-black font-bold py-3 rounded text-center block">
 Generar reporte PDF
+</a>
 
-</button>
 
 </div>
 

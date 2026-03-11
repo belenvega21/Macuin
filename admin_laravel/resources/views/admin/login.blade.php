@@ -8,7 +8,6 @@
 <title>Login | MACUIN Autopartes</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 
 <script src="https://cdn.tailwindcss.com"></script>
@@ -56,7 +55,6 @@ box-shadow:0 0 40px rgba(189,0,0,.1);
 
 </div>
 
-
 <main class="relative z-10 w-full max-w-lg p-6">
 
 <div class="flex flex-col items-center mb-8">
@@ -71,18 +69,22 @@ INGRESO AL SISTEMA
 
 </div>
 
-
 <div class="glass-panel rounded-2xl p-8 w-full">
 
 <h2 class="text-xl font-bold mb-6 text-center">
 Inicio de Sesión
 </h2>
 
+{{-- Mensaje de error --}}
+@if(session('error'))
+<p class="text-red-500 text-sm text-center mb-4">
+{{ session('error') }}
+</p>
+@endif
 
-<form method="POST" action="/admin">
+<form method="POST" action="/login">
 
 @csrf
-
 
 <div class="mb-4">
 
@@ -91,13 +93,10 @@ Inicio de Sesión
 <select name="rol" class="w-full mt-1 p-3 bg-black border border-gray-700 rounded">
 
 <option>Administrador</option>
-<option>Ventas</option>
-<option>Almacén</option>
 
 </select>
 
 </div>
-
 
 <div class="mb-4">
 
@@ -105,11 +104,11 @@ Inicio de Sesión
 
 <input type="email"
 name="email"
+required
 class="w-full mt-1 p-3 bg-black border border-gray-700 rounded"
-placeholder="correo@macuin.com">
+placeholder="admin@macuin.com">
 
 </div>
-
 
 <div class="mb-6">
 
@@ -117,13 +116,14 @@ placeholder="correo@macuin.com">
 
 <input type="password"
 name="password"
+required
 class="w-full mt-1 p-3 bg-black border border-gray-700 rounded"
 placeholder="********">
 
 </div>
 
-
-<button class="w-full bg-yellowaccent text-black font-bold py-3 rounded hover:bg-yellow-400 transition">
+<button type="submit"
+class="w-full bg-yellowaccent text-black font-bold py-3 rounded hover:bg-yellow-400 transition">
 
 INGRESAR
 

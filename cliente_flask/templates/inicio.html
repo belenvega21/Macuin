@@ -55,7 +55,6 @@ font-family:'Chakra Petch',sans-serif;
 
 <div class="w-full max-w-6xl pb-24">
 
-<!-- HEADER -->
 
 <header class="sticky top-0 bg-darkbg border-b border-borderdark px-6 py-4 z-50">
 
@@ -111,7 +110,6 @@ Buscar
 
 <main class="px-6 py-8 space-y-10">
 
-<!-- MARCAS -->
 
 <section>
 
@@ -124,24 +122,24 @@ Marcas Líderes
 
 <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Duralast_logo.png" class="bg-cardbg p-3 rounded border border-borderdark">
+<img src="{{ url_for('static', filename='img/shop.avif') }}" class="bg-cardbg p-4 rounded border border-borderdark h-20 w-full object-contain">
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/6/6c/LTH_logo.png" class="bg-cardbg p-3 rounded border border-borderdark">
+<img src="{{ url_for('static', filename='img/lider.jpeg') }}" class="bg-cardbg p-3 rounded border border-borderdark h-20 w-full object-contain">
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/FRAM_logo.png" class="bg-cardbg p-3 rounded border border-borderdark">
+<img src="{{ url_for('static', filename='img/company.jpeg') }}" class="bg-cardbg p-3 rounded border border-borderdark h-20 w-full object-contain">
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/LuK_logo.png" class="bg-cardbg p-3 rounded border border-borderdark">
+<img src="{{ url_for('static', filename='img/autoparts.webp') }}" class="bg-cardbg p-3 rounded border border-borderdark h-20 w-full object-contain">
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/e/e6/Total_logo.png" class="bg-cardbg p-3 rounded border border-borderdark">
+<img src="{{ url_for('static', filename='img/carlogo.jpeg') }}" class="bg-cardbg p-3 rounded border border-borderdark h-20 w-full object-contain">
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Bosch-logo.png" class="bg-cardbg p-3 rounded border border-borderdark">
+<img src="{{ url_for('static', filename='img/automotive.jpg') }}" class="bg-cardbg p-3 rounded border border-borderdark h-20 w-full object-contain">
+
 
 </div>
 
 </section>
 
 
-<!-- OFERTAS -->
 
 <section>
 
@@ -163,7 +161,6 @@ Ver todo
 
 <div class="grid md:grid-cols-2 gap-6">
 
-<!-- PRODUCTO 1 -->
 
 <div class="bg-zinc-900 border border-red-900/40 rounded-xl p-6 relative overflow-hidden">
 
@@ -193,7 +190,6 @@ Comprar ahora
 </div>
 
 
-<!-- PRODUCTO 2 -->
 
 <div class="bg-zinc-900 border border-red-900/40 rounded-xl p-6 relative overflow-hidden">
 
@@ -228,7 +224,6 @@ Ver oferta
 
 </main>
 
-<!-- MENU INFERIOR -->
 
 <nav class="fixed bottom-0 w-full max-w-6xl bg-darkbg border-t border-borderdark py-3 px-6 flex justify-between">
 
@@ -253,15 +248,6 @@ Ver oferta
 <span class="material-symbols-outlined text-2xl">shopping_cart</span>
 <span class="text-xs">Carrito</span>
 
-</a>
-
-
-<a href="/favoritos" class="flex flex-col items-center text-gray-400 hover:text-white">
-
-<span class="material-symbols-outlined text-2xl">favorite</span>
-<span class="text-xs">Favoritos</span>
-
-</a>
 
 
 <a href="/pedidos" class="flex flex-col items-center text-gray-400 hover:text-white">
