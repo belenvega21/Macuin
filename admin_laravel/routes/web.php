@@ -5,14 +5,19 @@ use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('inicio');
+
+Route::post('/login', function (Request $request) {
+    return redirect('/admin');
+})->name('login');
 
 
 
 
 Route::get('/admin', function () {
     return view('admin.dashboard');
-});
+})->name('dashboard'); 
+
 
 
 
@@ -48,8 +53,11 @@ Route::get('/historial-cliente', function () {
     return view('admin.historial_cliente');
 });
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 11e97a88df5150c315092a19e791647e06de52ea
 Route::get('/reportes', function () {
     return view('admin.reportes');
 });

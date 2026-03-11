@@ -77,8 +77,6 @@ linear-gradient(to bottom, rgba(190,0,0,0.05) 1px, transparent 1px);
 
 <div class="relative flex h-screen">
 
-<!-- SIDEBAR -->
-
 <aside class="w-20 lg:w-64 glass-panel-heavy border-r border-white/10 flex flex-col justify-between">
 
 <div>
@@ -154,11 +152,7 @@ linear-gradient(to bottom, rgba(190,0,0,0.05) 1px, transparent 1px);
 
 
 
-<!-- MAIN -->
-
 <main class="flex-1 flex flex-col overflow-hidden">
-
-<!-- HEADER -->
 
 <header class="h-20 glass-panel border-b border-white/10 flex items-center justify-between px-8">
 
@@ -194,14 +188,10 @@ Panel de Control
 
 
 
-<!-- CONTENIDO -->
-
 <div class="flex-1 overflow-y-auto p-8">
 
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
 
-
-<!-- CARD 1 -->
 
 <div class="glass-panel p-6 rounded-2xl card-glow">
 
@@ -212,8 +202,6 @@ Panel de Control
 </div>
 
 
-<!-- CARD 2 -->
-
 <div class="glass-panel p-6 rounded-2xl card-glow">
 
 <h3 class="text-gray-400 text-sm uppercase">Pedidos por surtir</h3>
@@ -222,8 +210,6 @@ Panel de Control
 
 </div>
 
-
-<!-- CARD 3 -->
 
 <div class="glass-panel p-6 rounded-2xl border-yellow-500/30">
 
@@ -234,26 +220,9 @@ Panel de Control
 </div>
 
 
-<!-- CARD 4 -->
-
-<div class="glass-panel p-6 rounded-2xl">
-
-<h3 class="text-primary text-xs uppercase">Mensaje del día</h3>
-
-<p class="text-lg font-display italic mt-2">
-
-"La excelencia no es un acto, sino un hábito."
-
-</p>
-
 </div>
 
 
-</div>
-
-
-
-<!-- GRAFICA SIMULADA -->
 
 <div class="glass-panel rounded-2xl p-6">
 

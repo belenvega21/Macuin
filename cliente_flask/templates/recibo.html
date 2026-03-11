@@ -30,15 +30,15 @@ color:white;
 <body>
 
 
-<!-- HEADER -->
-
 <header class="sticky top-0 z-50 bg-[#1d0d0d] border-b border-red-900 px-6 py-4">
 
 <div class="flex justify-between items-center">
 
-<h1 class="text-lg font-bold">
-Macuin <span class="text-red-600">Autopartes</span>
-</h1>
+<a href="{{ url_for('inicio') }}">
+    <h1 class="text-lg font-bold">
+    Macuin <span class="text-red-600">Autopartes</span>
+    </h1>
+</a>
 
 <div class="flex items-center gap-2">
 
@@ -59,7 +59,7 @@ person
 
 <div class="flex items-center gap-2">
 
-<a href="/pedidos" class="material-symbols-outlined bg-[#2d1616] border border-red-900 rounded p-1 hover:bg-red-600">
+<a href="{{ url_for('pedidos') }}" class="material-symbols-outlined bg-[#2d1616] border border-red-900 rounded p-1 hover:bg-red-600">
 arrow_back
 </a>
 
@@ -88,12 +88,8 @@ download
 
 
 
-<!-- CONTENIDO -->
-
 <main class="max-w-md mx-auto p-6">
 
-
-<!-- RECIBO -->
 
 <div class="bg-white text-black rounded shadow-xl overflow-hidden">
 
@@ -102,8 +98,6 @@ download
 
 <div class="p-6">
 
-
-<!-- EMPRESA -->
 
 <div class="flex justify-between border-b pb-4">
 
@@ -143,8 +137,6 @@ Recibo
 </div>
 
 
-
-<!-- CLIENTE -->
 
 <div class="grid grid-cols-2 gap-4 mt-4">
 
@@ -188,8 +180,6 @@ Fecha emisión
 </div>
 
 
-
-<!-- PRODUCTOS -->
 
 <table class="w-full mt-6 text-sm">
 
@@ -283,8 +273,6 @@ $7,199.00
 </table>
 
 
-
-<!-- TOTALES -->
 
 <div class="mt-6 border-t pt-4">
 
