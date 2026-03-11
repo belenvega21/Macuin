@@ -8,7 +8,6 @@ Route::get('/', function () {
 })->name('inicio');
 
 Route::post('/login', function (Request $request) {
-
     return redirect('/admin');
 })->name('login');
 
@@ -20,7 +19,7 @@ Route::get('/admin', function () {
 Route::get('/login', function () {
     return view('admin.login');
 });
-x
+
 Route::get('/register', function () {
     return view('admin.register');
 });
