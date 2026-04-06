@@ -1,298 +1,329 @@
 <!DOCTYPE html>
-<html class="dark" lang="es">
-
+<html lang="es" class="dark">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MACUIN</title>
 
-<title>Macuin Autopartes - Inicio</title>
-
-<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-
-<script>
-tailwind.config = {
-darkMode: "class",
-theme: {
-extend: {
-colors: {
-primary: "#FFD700",
-redaccent: "#D32F2F",
-darkbg: "#050505",
-cardbg: "#0F0F10",
-inputbg: "#121212",
-borderdark: "#2a2a2a"
-},
-fontFamily: {
-sans: ["Roboto", "sans-serif"],
-tech: ["Chakra Petch", "sans-serif"]
-}
-}
-}
-}
-</script>
+<script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-
-body{
-font-family:'Roboto',sans-serif;
-background:#050505;
-color:white;
+body {
+  background: #0e0e0e;
+  color: white;
+  font-family: 'Inter', sans-serif;
 }
-
-.tech{
-font-family:'Chakra Petch',sans-serif;
-}
-
 </style>
-
 </head>
 
-<body class="bg-darkbg min-h-screen flex justify-center">
+<body>
 
-<div class="w-full max-w-6xl pb-24">
+<!-- 🔥 NAVBAR -->
+<nav class="fixed top-0 w-full z-50 bg-[#0e0e0e]/80 backdrop-blur border-b border-gray-800">
+  <div class="flex justify-between items-center px-8 py-4">
 
-<<<<<<< HEAD
+    <div class="flex items-center gap-3">
+      <img src="/static/img/nuevologo.png" class="h-10">
+      <span class="font-bold text-lg">MACUIN</span>
+    </div>
 
-=======
->>>>>>> 11e97a88df5150c315092a19e791647e06de52ea
-<header class="sticky top-0 bg-darkbg border-b border-borderdark px-6 py-4 z-50">
+    <div class="hidden md:flex gap-8 text-sm">
+      <a href="/inicio" class="text-yellow-400">Inicio</a>
+      <a href="/catalogo" class="hover:text-yellow-400">Catálogo</a>
+      <a href="/carrito" class="hover:text-yellow-400">Carrito</a>
+      <a href="/perfil" class="hover:text-yellow-400">Perfil</a>
 
-<div class="flex justify-between items-center mb-4">
+    </div>
 
-<a href="{{ url_for('inicio') }}">
-    <h1 class="text-xl font-black uppercase tech">
-    Macuin <span class="text-red-600">Autopartes</span>
+    <a href="/login" class="bg-yellow-400 text-black px-4 py-2 rounded-md font-bold hover:bg-yellow-500">
+      Cerrar sesión
+    </a>
+
+  </div>
+</nav>
+
+<main class="pt-24">
+
+<!-- 🔥 HERO -->
+<section class="px-8 md:px-16 py-20 grid md:grid-cols-2 gap-10 items-center relative">
+
+  <!-- Glow fondo -->
+  <div class="absolute -z-10 top-10 right-10 w-80 h-80 bg-yellow-400/10 blur-3xl"></div>
+
+  <!-- TEXTO -->
+  <div>
+    <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+      CONTROL TOTAL DE <br>
+      <span class="text-yellow-400 ">
+        AUTOPARTES
+        
+      </span>
     </h1>
-</a>
 
-<div class="flex items-center gap-3 bg-cardbg border border-borderdark px-3 py-1 rounded-full">
+    <p class="text-gray-400 mb-8">
+      Gestiona inventario, ventas y clientes en tiempo real con MACUIN.
+    </p>
 
-<span class="text-xs text-gray-400">
-Taller "Vega"
-</span>
+    <div class="flex gap-4">
+      <a href="/catalogo"
+         class="bg-yellow-400 text-black px-6 py-3 font-bold rounded-md
+                hover:bg-yellow-500 transition shadow-[0_0_20px_rgba(255,193,7,0.3)]">
+        Ver catálogo
+      </a>
+    </div>
+  </div>
+  
+  <!-- IMAGEN PRO -->
+  <div class="relative">
 
-<span class="material-symbols-outlined text-red-600">
-person
-</span>
-
-</div>
-
-</div>
-
-<div class="bg-gradient-to-r from-red-900/40 via-cardbg to-transparent border-l-4 border-red-600 p-3 rounded">
-
-<h2 class="text-sm font-bold tech uppercase">
-Orgullosamente Macuin
-</h2>
-
-<p class="text-xs text-gray-400">
-Expertos en autopartes de alta calidad
-</p>
-
-</div>
-
-<div class="flex gap-2 mt-4">
-
-<input
-type="text"
-placeholder="Buscar autoparte..."
-class="flex-1 bg-inputbg border border-borderdark px-4 py-2 text-sm rounded"
->
-
-<button class="bg-red-700 px-5 py-2 text-sm font-bold uppercase hover:bg-red-600">
-Buscar
-</button>
-
-</div>
-
-</header>
-
-<main class="px-6 py-8 space-y-10">
-
-<<<<<<< HEAD
-
-=======
->>>>>>> 11e97a88df5150c315092a19e791647e06de52ea
-<section>
-
-<h3 class="text-sm font-bold uppercase tech flex items-center gap-2 mb-4">
-
-<span class="w-1 h-4 bg-red-600"></span>
-Marcas Líderes
-
-</h3>
-
-<div class="grid grid-cols-3 md:grid-cols-6 gap-4">
-
-<img src="{{ url_for('static', filename='img/shop.avif') }}" class="bg-cardbg p-4 rounded border border-borderdark h-20 w-full object-contain">
-
-<img src="{{ url_for('static', filename='img/lider.jpeg') }}" class="bg-cardbg p-3 rounded border border-borderdark h-20 w-full object-contain">
-
-<img src="{{ url_for('static', filename='img/company.jpeg') }}" class="bg-cardbg p-3 rounded border border-borderdark h-20 w-full object-contain">
-
-<img src="{{ url_for('static', filename='img/autoparts.webp') }}" class="bg-cardbg p-3 rounded border border-borderdark h-20 w-full object-contain">
-
-<img src="{{ url_for('static', filename='img/carlogo.jpeg') }}" class="bg-cardbg p-3 rounded border border-borderdark h-20 w-full object-contain">
-
-<img src="{{ url_for('static', filename='img/automotive.jpg') }}" class="bg-cardbg p-3 rounded border border-borderdark h-20 w-full object-contain">
-
-
-</div>
+    <!-- Imagen -->
+    <img src="/static/img/MC1.png"
+         class="w-full rounded-xl opacity-95
+                scale-105
+                shadow-[0_0_60px_rgba(255,193,7,0.4)]">
+  
+    <!-- Overlay oscuro -->
+    <div class="absolute inset-0 rounded-xl
+                bg-gradient-to-r
+                from-black/80 via-black/20 to-transparent">
+    </div>
+  
+    <!-- Glow amarillo -->
+    <div class="absolute inset-0 rounded-xl
+                bg-[radial-gradient(circle_at_70%_50%,rgba(255,193,7,0.25),transparent_60%)]">
+    </div>
+  
+  </div>
 
 </section>
 
+<!-- 🔍 BUSCADOR -->
+<section class="px-8 md:px-16 mb-20">
 
-<<<<<<< HEAD
+  <form action="/buscar" method="GET"
+        class="max-w-4xl mx-auto bg-[#1a1a1a] p-3 rounded-xl border border-gray-800 flex gap-2">
 
-=======
->>>>>>> 11e97a88df5150c315092a19e791647e06de52ea
-<section>
+    <input 
+      type="text" 
+      name="q"
+      placeholder="Buscar autopartes..."
+      class="flex-1 bg-[#111] px-4 py-4 rounded-lg outline-none text-white"
+    >
 
-<div class="flex justify-between items-center mb-4">
+    <button class="bg-yellow-400 text-black px-6 font-bold rounded-lg hover:bg-yellow-500">
+      Buscar
+    </button>
 
-<h3 class="text-sm font-bold uppercase tech flex items-center gap-2">
+  </form>
 
-<span class="w-1 h-4 bg-yellow-400"></span>
-Ofertas de la Semana
+</section>
 
-</h3>
+<!-- 🚗 MARCAS -->
+<section class="px-8 md:px-16 py-20">
 
-<a href="{{ url_for('catalogo') }}" class="text-xs text-red-500 hover:text-white">
-Ver todo
-</a>
+  <h2 class="text-3xl font-bold mb-14 text-center tracking-wide">
+    Marcas con las que trabajamos
+  </h2>
 
-</div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-10">
+
+    {% for marca in marcas %}
+    <div onclick="toggleInfo({{ loop.index }})"
+         class="group relative bg-white/5 backdrop-blur-lg border border-white/10 
+                rounded-2xl p-8 text-center cursor-pointer 
+                transition duration-300 hover:scale-105 hover:border-yellow-400/50">
+
+        <!-- GLOW -->
+        <div class="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 
+                    transition duration-300 bg-gradient-to-r from-yellow-400/10 to-transparent">
+        </div>
+
+        <!-- LOGO -->
+        <img src="{{ marca.imagen }}" 
+             class="h-16 mx-auto mb-5 object-contain 
+                    transition duration-300 
+                    group-hover:scale-110">
+
+        <!-- NOMBRE -->
+        <h3 class="font-semibold text-lg tracking-wide">
+          {{ marca.nombre }}
+        </h3>
+
+        <!-- LINEA DECORATIVA -->
+        <div class="w-8 h-[2px] bg-yellow-400 mx-auto my-3 opacity-0 group-hover:opacity-100 transition"></div>
+
+        <!-- INFO -->
+        <div id="info-{{ loop.index }}" 
+             class="max-h-0 overflow-hidden transition-all duration-500 text-sm text-gray-400">
+
+          <p class="mt-3">
+            {{ marca.descripcion or "Innovación, rendimiento y confianza en cada vehículo." }}
+          </p>
+
+          <a href="/catalogo?marca={{ marca.nombre }}" 
+             class="inline-block mt-4 text-yellow-400 hover:text-yellow-300 font-medium">
+            Ver catálogo →
+          </a>
+
+        </div>
+
+    </div>
+    {% endfor %}
+
+  </div>
+
+</section>
+<section class="px-8 md:px-16 mb-24">
+
+  <h2 class="text-3xl font-semibold mb-14 text-center">
+    Productos destacados
+  </h2>
+
+  <div class="grid md:grid-cols-3 gap-10">
+
+    {% for producto in productos[:3] %}
+
+    <div class="group relative bg-white/5 backdrop-blur-lg 
+                border border-white/10 rounded-2xl p-6 
+                transition duration-500 
+                hover:-translate-y-2 
+                hover:shadow-[0_20px_60px_rgba(0,0,0,0.7)]">
+
+      <!-- GLOW -->
+      <div class="absolute inset-0 rounded-2xl opacity-0 
+                  group-hover:opacity-100 transition 
+                  bg-gradient-to-br from-yellow-400/10 to-transparent">
+      </div>
+
+      <!-- IMAGEN -->
+      <div class="relative h-52 flex items-center justify-center mb-6">
+
+        <!-- sombra -->
+        <div class="absolute w-32 h-6 bg-black/60 blur-xl bottom-3"></div>
+
+        <img src="{{ producto.imagen }}" 
+             class="relative h-full object-contain 
+                    transition duration-500 
+                    group-hover:scale-110 
+                    drop-shadow-[0_10px_25px_rgba(0,0,0,0.7)]">
+      </div>
+
+      <!-- INFO -->
+      <h3 class="text-lg font-semibold">
+        {{ producto.nombre }}
+      </h3>
+
+      <p class="text-gray-400 text-sm mt-1">
+        {{ producto.descripcion }}
+      </p>
+
+      <!-- PRECIO -->
+      <p class="text-yellow-400 font-bold text-lg mt-4">
+        ${{ producto.precio }}
+      </p>
+
+      <!-- BOTÓN -->
+      <a href="/agregar/{{ producto.id }}"
+         class="mt-5 flex items-center justify-center gap-2 
+                bg-yellow-400 text-black py-2.5 rounded-lg 
+                font-medium transition duration-300 
+                hover:bg-yellow-300 hover:gap-3">
+
+        Agregar
+        <span class="transition group-hover:translate-x-1">→</span>
+
+      </a>
+
+    </div>
+
+    {% endfor %}
+
+  </div>
+
+</section>
+
+<script>
+  let openCard = null;
+  
+  function toggleInfo(id) {
+    const element = document.getElementById("info-" + id);
+  
+    // cerrar la que ya está abierta
+    if (openCard && openCard !== element) {
+      openCard.style.maxHeight = "0px";
+    }
+  
+    // toggle actual
+    if (element.style.maxHeight && element.style.maxHeight !== "0px") {
+      element.style.maxHeight = "0px";
+      openCard = null;
+    } else {
+      element.style.maxHeight = element.scrollHeight + "px";
+      openCard = element;
+    }
+  }
+  </script>
 
 
-<div class="grid md:grid-cols-2 gap-6">
+<!-- 🧠 FUNCIONES -->
+<section class="px-8 md:px-16 mb-20">
 
-<<<<<<< HEAD
+  <div class="grid md:grid-cols-3 gap-6">
 
-=======
->>>>>>> 11e97a88df5150c315092a19e791647e06de52ea
-<div class="bg-zinc-900 border border-red-900/40 rounded-xl p-6 relative overflow-hidden">
+    <div class="bg-[#111] p-6 rounded-xl border border-gray-800 hover:border-yellow-400">
+      <h3 class="font-bold mb-2">Inventario</h3>
+      <p class="text-gray-400 text-sm">Controla tus productos fácilmente.</p>
+    </div>
 
-<img src="https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2"
-class="absolute right-0 top-0 h-full opacity-40">
+    <div class="bg-[#111] p-6 rounded-xl border border-gray-800 hover:border-yellow-400">
+      <h3 class="font-bold mb-2">Ventas</h3>
+      <p class="text-gray-400 text-sm">Gestiona pedidos y clientes.</p>
+    </div>
 
-<div class="relative z-10 max-w-xs">
+    <div class="bg-[#111] p-6 rounded-xl border border-gray-800 hover:border-yellow-400">
+      <h3 class="font-bold mb-2">Reportes</h3>
+      <p class="text-gray-400 text-sm">Analiza tu negocio.</p>
+    </div>
 
-<div class="bg-primary text-black text-xs font-bold px-3 py-1 rounded mb-3">
-Gran Venta
-</div>
+  </div>
 
-<h4 class="text-3xl font-black uppercase tech mb-2">
-Frenos de Cerámica
-</h4>
+</section>
 
-<p class="text-xs text-gray-300 mb-5">
-Hasta 30% de descuento
-</p>
+<!-- 📊 STATS -->
+<section class="px-8 md:px-16 mb-20">
 
-<button class="bg-red-600 px-5 py-2 text-xs uppercase font-bold hover:bg-red-500">
-Comprar ahora
-</button>
+  <div class="grid grid-cols-2 md:grid-cols-4 text-center mt-10">
 
-</div>
-
-</div>
-
-
-<<<<<<< HEAD
-
-=======
->>>>>>> 11e97a88df5150c315092a19e791647e06de52ea
-<div class="bg-zinc-900 border border-red-900/40 rounded-xl p-6 relative overflow-hidden">
-
-<img src="https://images.unsplash.com/photo-1619642751034-765dfdf7c58e"
-class="absolute right-0 top-0 h-full opacity-40">
-
-<div class="relative z-10 max-w-xs">
-
-<div class="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded mb-3">
-Liquidación
-</div>
-
-<h4 class="text-3xl font-black uppercase tech mb-2">
-Aceite Sintético
-</h4>
-
-<p class="text-xs text-gray-300 mb-5">
-4L + Filtro Gratis
-</p>
-
-<button class="bg-white text-black px-5 py-2 text-xs uppercase font-bold hover:bg-gray-200">
-Ver oferta
-</button>
-
-</div>
-
-</div>
-
-</div>
+    <div>
+      <h3 class="text-yellow-400 text-2xl font-bold">+500</h3>
+      <p>Productos disponibles</p>
+    </div>
+  
+    <div>
+      <h3 class="text-yellow-400 text-2xl font-bold">24/7</h3>
+      <p>Soporte</p>
+    </div>
+  
+    <div>
+      <h3 class="text-yellow-400 text-2xl font-bold">100%</h3>
+      <p>Calidad</p>
+    </div>
+  
+    <div>
+      <h3 class="text-yellow-400 text-2xl font-bold">Envíos</h3>
+      <p>Todo México</p>
+    </div>
+  
+  </div>
 
 </section>
 
 </main>
 
-<<<<<<< HEAD
-=======
-<nav class="fixed bottom-0 w-full max-w-6xl bg-darkbg border-t border-borderdark py-3 px-6 flex justify-between z-50">
->>>>>>> 11e97a88df5150c315092a19e791647e06de52ea
-
-<a href="{{ url_for('inicio') }}" class="flex flex-col items-center text-red-600">
-
-<span class="material-symbols-outlined text-2xl">home</span>
-<span class="text-xs">Inicio</span>
-
-</a>
-
-
-<a href="{{ url_for('catalogo') }}" class="flex flex-col items-center text-gray-400 hover:text-white">
-
-<span class="material-symbols-outlined text-2xl">grid_view</span>
-<span class="text-xs">Catálogo</span>
-
-</a>
-
-
-<a href="{{ url_for('carrito') }}" class="flex flex-col items-center text-gray-400 hover:text-white">
-
-<span class="material-symbols-outlined text-2xl">shopping_cart</span>
-<span class="text-xs">Carrito</span>
-
-<<<<<<< HEAD
-=======
-</a>
-
-
-<a href="#" class="flex flex-col items-center text-gray-400 hover:text-white">
-
-<span class="material-symbols-outlined text-2xl">favorite</span>
-<span class="text-xs">Favoritos</span>
-
-</a>
->>>>>>> 11e97a88df5150c315092a19e791647e06de52ea
-
-
-<a href="{{ url_for('pedidos') }}" class="flex flex-col items-center text-gray-400 hover:text-white">
-
-<span class="material-symbols-outlined text-2xl">receipt_long</span>
-<span class="text-xs">Pedidos</span>
-
-</a>
-
-</nav>
-
-</div>
-
-<script>
-document.documentElement.classList.add('dark');
-</script>
+<!-- FOOTER -->
+<footer class="bg-[#0e0e0e] border-t border-gray-800 text-center py-6 text-gray-500 text-sm">
+  © 2026 MACUIN - Autopartes
+</footer>
 
 </body>
 </html>

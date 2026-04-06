@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro - MACUIN</title>
+
+  <link rel="stylesheet" href="/static/css/auth.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- 🔶 IZQUIERDA -->
+  <div class="left">
+    <div class="overlay">
+
+      <!-- LOGO PRO -->
+      <div class="logo-container">
+        <img src="/static/img/nuevologo.png" alt="MACUIN Logo">
+      </div>
+
+      <h4>MACUIN</h4>
+      <p class="subtitle">INDUSTRIAL PRECISION ENGINEERED</p>
+
+      <h1>
+        ADVANCED <br>
+        <span>AUTOPARTS</span><br>
+        SOLUTIONS.
+      </h1>
+
+      <p class="desc">
+        Únete a la plataforma inteligente para gestionar autopartes,
+        clientes y ventas en tiempo real.
+      </p>
+
+    </div>
+  </div>
+
+  <!-- 📝 DERECHA -->
+  <div class="right">
+    <div class="card">
+
+      <h2>Crear cuenta</h2>
+      <p class="small">Regístrate para acceder al sistema</p>
+
+      <!-- ERROR VISUAL -->
+      <div id="error-box" class="error-box" style="display:none;">
+        Las contraseñas no coinciden
+      </div>
+
+      <!-- FORM -->
+      <form action="/auth/registro" method="POST">
+
+        <label>Nombre del negocio</label>
+        <input type="text" name="nombre" placeholder="Ej. Refaccionaria López" required>
+
+        <label>Correo</label>
+        <input type="email" name="email" placeholder="ejemplo@macuin.com" required>
+
+        <label>Teléfono</label>
+        <input type="tel" name="telefono" placeholder="4421234567" required>
+
+        <div class="grid-2">
+          <div>
+            <label>Contraseña</label>
+            <div class="input-icon">
+              <input id="password" type="password" name="password" placeholder="••••••••" required>
+              <span onclick="togglePassword('password')">👁️</span>
+            </div>
+          </div>
+
+          <div>
+            <label>Confirmar</label>
+            <div class="input-icon">
+              <input id="confirmar" type="password" name="confirmar" placeholder="••••••••" required>
+              <span onclick="togglePassword('confirmar')">👁️</span>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit">CREAR CUENTA</button>
+
+      </form>
+
+      <p class="extra">
+        ¿Ya tienes cuenta?
+        <a href="/login">Inicia sesión</a>
+      </p>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- SCRIPTS -->
+<script>
+function togglePassword(id) {
+  const input = document.getElementById(id);
+  input.type = input.type === "password" ? "text" : "password";
+}
+
+const params = new URLSearchParams(window.location.search);
+if (params.get("error")) {
+  document.getElementById("error-box").style.display = "block";
+}
+</script>
+
+</body>
+</html>

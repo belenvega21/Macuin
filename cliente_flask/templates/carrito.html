@@ -1,269 +1,216 @@
 <!DOCTYPE html>
 <html lang="es" class="dark">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Carrito | Macuin Autopartes</title>
-
 <script src="https://cdn.tailwindcss.com"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+<title>Carrito | MACUIN</title>
 
 <style>
-
-body{
-font-family:'Space Grotesk',sans-serif;
-background:#140909;
-color:white;
+body {
+    background: #0b0b0b;
+    color: white;
+    font-family: 'Inter', sans-serif;
 }
-
-.cart-item:hover{
-box-shadow:0 0 15px rgba(255,0,0,.3);
-transition:.25s;
-}
-
 </style>
-
 </head>
-
 
 <body>
 
+<!-- 🔥 NAVBAR -->
+<nav class="fixed top-0 w-full z-50 bg-[#0e0e0e]/80 backdrop-blur border-b border-gray-800">
+    <div class="flex justify-between items-center px-8 py-4">
+  
+      <div class="flex items-center gap-3">
+        <img src="/static/img/nuevologo.png" class="h-10">
+        <span class="font-bold text-lg">MACUIN</span>
+      </div>
+  
+      <div class="hidden md:flex gap-8 text-sm">
+        <a href="/inicio" class="text-yellow-400">Inicio</a>
+        <a href="/catalogo" class="hover:text-yellow-400">Catálogo</a>
+        <a href="/carrito" class="hover:text-yellow-400">Carrito</a>
+        <a href="/perfil" class="hover:text-yellow-400">Perfil</a>
+  
+      </div>
+  
+      <a href="/login" class="bg-yellow-400 text-black px-4 py-2 rounded-md font-bold hover:bg-yellow-500">
+        Cerrar sesión
+      </a>
+  
+    </div>
+  </nav>
+  
+  <main class="pt-24">
 
-<header class="sticky top-0 z-50 bg-[#1d0d0d] border-b border-red-900 px-6 py-4">
+<!-- CONTENIDO -->
+<main class="max-w-7xl mx-auto px-12 lg:px-16 pt-32 pb-16">
 
-<div class="flex justify-between items-center">
+<div class="grid lg:grid-cols-3 gap-12">
 
-<a href="{{ url_for('inicio') }}">
-    <h1 class="text-lg font-bold">
-    Macuin <span class="text-red-600">Autopartes</span>
-    </h1>
-</a>
+<!-- 🛒 LISTA -->
+<div class="lg:col-span-2">
 
-<div class="flex items-center gap-2">
-
-<span class="text-xs text-gray-400">
-Taller Vega
-</span>
-
-<span class="material-symbols-outlined text-red-600">
-person
-</span>
-
-</div>
-
-</div>
-
-
-<div class="flex justify-between items-center mt-4">
-
-<div class="flex items-center gap-2">
-
-<a href="{{ url_for('catalogo') }}" class="material-symbols-outlined bg-[#2d1616] border border-red-900 rounded p-1 hover:bg-red-600">
-arrow_back
-</a>
-
-<h2 class="font-bold text-lg">
-Tu carrito <span class="text-red-600">(3)</span>
+<h2 class="text-5xl font-extrabold mb-10 tracking-tight">
+    Tu carrito
 </h2>
 
-</div>
-
-<button class="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1">
-
-Vaciar carrito
-
-<span class="material-symbols-outlined text-sm">
-delete
-</span>
-
-</button>
+<div id="carrito-container" class="space-y-6"></div>
 
 </div>
 
-</header>
+<!-- 💰 RESUMEN PRO -->
+<div class="bg-gradient-to-br from-[#111] to-[#0a0a0a] 
+            border border-white/10 
+            rounded-3xl 
+            p-8 
+            shadow-[0_0_40px_rgba(255,204,0,0.08)] 
+            h-fit 
+            relative overflow-hidden">
 
+    <!-- Glow -->
+    <div class="absolute -top-20 -right-20 w-60 h-60 bg-yellow-400 opacity-10 blur-3xl"></div>
 
+    <h3 class="text-2xl font-bold mb-8">Resumen</h3>
 
-<main class="max-w-3xl mx-auto p-6 space-y-4">
+    <div class="space-y-4 text-gray-400 text-sm">
 
+        <div class="flex justify-between">
+            <span>Subtotal</span>
+            <span id="subtotal">$0</span>
+        </div>
 
-<div class="cart-item bg-[#2d1616] border border-red-900 rounded-lg p-4 flex gap-4 items-center">
+        <div class="flex justify-between">
+            <span>IVA (16%)</span>
+            <span id="iva">$0</span>
+        </div>
 
-<img src="{{ url_for('static', filename='img/balatas.webp') }}" class="h-20 w-20 object-contain bg-black p-2 rounded">
+        <div class="flex justify-between">
+            <span>Envío</span>
+            <span class="text-green-400 font-semibold">Gratis</span>
+        </div>
 
-<div class="flex-1">
+    </div>
 
-<p class="text-xs text-gray-400">
-ID: PZ-4002
-</p>
+    <div class="border-t border-white/10 my-6"></div>
 
-<h3 class="font-semibold">
-Balatas Cerámicas de Freno
-</h3>
+    <div class="flex justify-between items-end">
+        <span class="text-lg text-gray-400">Total</span>
+        <span id="total" class="text-4xl font-extrabold text-yellow-400">
+            $0
+        </span>
+    </div>
 
-<p class="font-bold mt-1">
-$619.00
-</p>
+    <div class="mt-8 space-y-4">
 
-</div>
+        <button class="w-full bg-yellow-400 text-black py-4 rounded-xl font-bold text-lg 
+                       hover:scale-[1.03] transition-all shadow-lg">
+            Finalizar compra
+        </button>
 
-<div class="flex items-center gap-2">
+        <button onclick="vaciarCarrito()" 
+                class="w-full bg-red-500 py-3 rounded-xl font-bold 
+                       hover:bg-red-600 transition-all">
+            Vaciar carrito
+        </button>
 
-<button class="bg-black border border-red-900 w-8 h-8 flex justify-center items-center rounded">
--
-</button>
-
-<span>
-1
-</span>
-
-<button class="bg-black border border-red-900 w-8 h-8 flex justify-center items-center rounded">
-+
-</button>
-
-</div>
-
-</div>
-
-
-
-<div class="cart-item bg-[#2d1616] border border-red-900 rounded-lg p-4 flex gap-4 items-center">
-
-<img src="{{ url_for('static', filename='img/alternador.jpeg') }}" class="h-20 w-20 object-contain bg-black p-2 rounded">
-
-<div class="flex-1">
-
-<p class="text-xs text-gray-400">
-ID: PZ-4003
-</p>
-
-<h3 class="font-semibold">
-Alternador 12V Remanufacturado
-</h3>
-
-<p class="font-bold mt-1">
-$2,829.00
-</p>
-
-</div>
-
-<div class="flex items-center gap-2">
-
-<button class="bg-black border border-red-900 w-8 h-8 flex justify-center items-center rounded">
--
-</button>
-
-<span>
-1
-</span>
-
-<button class="bg-black border border-red-900 w-8 h-8 flex justify-center items-center rounded">
-+
-</button>
+    </div>
 
 </div>
 
 </div>
-
-
-
-<div class="cart-item bg-[#2d1616] border border-red-900 rounded-lg p-4 flex gap-4 items-center">
-
-<img src="{{ url_for('static', filename='img/amortiguador.jpeg') }}" class="h-20 w-20 object-contain bg-black p-2 rounded">
-
-<div class="flex-1">
-
-<p class="text-xs text-gray-400">
-ID: PZ-4004
-</p>
-
-<h3 class="font-semibold">
-Amortiguador Trasero
-</h3>
-
-<p class="font-bold mt-1">
-$1,799.00
-</p>
-
-</div>
-
-<div class="flex items-center gap-2">
-
-<button class="bg-black border border-red-900 w-8 h-8 flex justify-center items-center rounded">
--
-</button>
-
-<span>
-1
-</span>
-
-<button class="bg-black border border-red-900 w-8 h-8 flex justify-center items-center rounded">
-+
-</button>
-
-</div>
-
-</div>
-
-
-
-<div class="bg-[#1d0d0d] border border-red-900 rounded-lg p-6 mt-8">
-
-<div class="space-y-2 text-sm">
-
-<div class="flex justify-between">
-<span class="text-gray-400">
-Subtotal
-</span>
-<span>
-$5,247.00
-</span>
-</div>
-
-<div class="flex justify-between">
-<span class="text-gray-400">
-IVA (16%)
-</span>
-<span>
-$839.52
-</span>
-</div>
-
-</div>
-
-
-<div class="flex justify-between mt-4 text-xl font-bold">
-
-<span>
-Total
-</span>
-
-<span class="text-red-500">
-$6,086.52
-</span>
-
-</div>
-
-<a href="{{ url_for('recibo') }}" class="w-full mt-6 bg-red-600 hover:bg-red-700 py-3 rounded font-semibold flex justify-center gap-2">
-
-Finalizar compra
-
-<span class="material-symbols-outlined">
-arrow_forward
-</span>
-
-</a>
-
-</div>
-
 </main>
 
+<!-- 🧠 SCRIPT -->
+<script>
+
+function obtenerCarrito() {
+    return JSON.parse(localStorage.getItem("carrito")) || [];
+}
+
+function guardarCarrito(carrito) {
+    localStorage.setItem("carrito", JSON.stringify(carrito));
+}
+
+function renderCarrito() {
+
+    const contenedor = document.getElementById("carrito-container");
+    const subtotalSpan = document.getElementById("subtotal");
+    const ivaSpan = document.getElementById("iva");
+    const totalSpan = document.getElementById("total");
+
+    let carrito = obtenerCarrito();
+    contenedor.innerHTML = "";
+
+    let subtotal = 0;
+
+    if (carrito.length === 0) {
+        contenedor.innerHTML = `
+        <div class="text-gray-400 text-lg">
+            Tu carrito está vacío 😢
+        </div>
+        `;
+        return;
+    }
+
+    carrito.forEach((producto, index) => {
+
+        subtotal += producto.precio;
+
+        contenedor.innerHTML += `
+        <div class="flex items-center justify-between bg-[#111] border border-white/10 rounded-xl p-5 hover:border-yellow-400 transition">
+
+            <div class="flex items-center gap-5">
+
+                <img src="${producto.imagen}" 
+                     class="w-28 h-28 object-contain bg-white rounded-lg p-2">
+
+                <div>
+                    <h3 class="text-xl font-bold">${producto.nombre}</h3>
+                    <p class="text-gray-400">$${producto.precio}</p>
+                </div>
+
+            </div>
+
+            <button onclick="eliminarProducto(${index})"
+                class="text-red-400 hover:text-red-600 font-semibold">
+                Eliminar
+            </button>
+
+        </div>
+        `;
+    });
+
+    let iva = subtotal * 0.16;
+    let total = subtotal + iva;
+
+    subtotalSpan.textContent = "$" + subtotal.toFixed(2);
+    ivaSpan.textContent = "$" + iva.toFixed(2);
+    totalSpan.textContent = "$" + total.toFixed(2);
+}
+
+function eliminarProducto(index) {
+    let carrito = obtenerCarrito();
+    carrito.splice(index, 1);
+    guardarCarrito(carrito);
+    renderCarrito();
+}
+
+function vaciarCarrito() {
+    localStorage.removeItem("carrito");
+    renderCarrito();
+}
+
+renderCarrito();
+
+</script>
 
 </body>
+<!-- FOOTER -->
+<footer class="bg-[#0e0e0e] border-t border-gray-800 text-center py-6 text-gray-500 text-sm">
+    © 2026 MACUIN - Autopartes
+</footer>
+
 </html>

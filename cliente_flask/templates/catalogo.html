@@ -1,380 +1,224 @@
 <!DOCTYPE html>
 <html lang="es" class="dark">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo - MACUIN</title>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-<title>Catálogo | Macuin Autopartes</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
 
-<script src="https://cdn.tailwindcss.com"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-
-<style>
-
-body{
-font-family:'Space Grotesk',sans-serif;
-background:#140909;
-color:white;
-}
-
-.product-card:hover{
-box-shadow:0 0 20px rgba(242,13,13,.35);
-transform:translateY(-4px);
-transition:.25s;
-}
-
-</style>
-
+    <style>
+        body {
+            background-color: #0e0e0e;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
 </head>
 
+<body class="flex flex-col min-h-screen">
 
-<body>
+<!-- 🔥 NAVBAR -->
+<nav class="fixed top-0 w-full z-50 bg-[#0e0e0e]/80 backdrop-blur border-b border-gray-800">
+    <div class="flex justify-between items-center px-8 py-4">
+  
+      <div class="flex items-center gap-3">
+        <img src="/static/img/nuevologo.png" class="h-10">
+        <span class="font-bold text-lg">MACUIN</span>
+      </div>
+  
+      <div class="hidden md:flex gap-8 text-sm items-center">
+        <a href="/inicio" class="text-yellow-400">Inicio</a>
+        <a href="/catalogo" class="hover:text-yellow-400">Catálogo</a>
 
-<header class="sticky top-0 z-50 bg-[#1d0d0d] border-b border-red-900 px-8 py-4">
+        <!-- 🛒 CARRITO CON CONTADOR -->
+        <a href="/carrito" class="hover:text-yellow-400 relative">
+          Carrito
+          <span id="contador-carrito"
+                class="absolute -top-2 -right-4 bg-yellow-400 text-black text-xs px-2 py-0.5 rounded-full">
+          </span>
+        </a>
 
-<div class="max-w-7xl mx-auto flex items-center justify-between gap-8">
+        <a href="/perfil" class="hover:text-yellow-400">Perfil</a>
+      </div>
+  
+      <a href="/login" class="bg-yellow-400 text-black px-4 py-2 rounded-lg font-semibold hover:bg-yellow-300 transition">
+        Cerrar sesión
+      </a>
+  
+    </div>
+</nav>
 
-<a href="{{ url_for('inicio') }}" class="flex items-center gap-2">
+<!-- CONTENIDO -->
+<main class="flex-1 pt-36 px-6 lg:px-10 pb-10">
 
-<span class="material-symbols-outlined text-red-600 text-3xl">
-settings_input_component
-</span>
+    <!-- HEADER -->
+    <div class="mb-12">
+        <h2 class="text-5xl font-extrabold leading-[1.2] pb-3 bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
+            Catálogo
+        </h2>
 
-<h1 class="text-xl font-bold">
-Macuin <span class="text-red-600">Autopartes</span>
-</h1>
+        <p class="text-gray-400 text-lg mt-2">
+            Encuentra las mejores autopartes para tu vehículo 
+        </p>
+    </div>
 
+    <!-- FILTROS -->
+    <form method="GET" action="/catalogo"
+        class="mb-12 flex flex-wrap gap-4 items-center bg-[#111] p-5 rounded-2xl border border-gray-800 shadow-md">
+
+        <input type="text" name="q" placeholder="Buscar producto..."
+            value="{{ request.args.get('q','') }}"
+            class="px-4 py-2 rounded-lg bg-[#0e0e0e] border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 transition">
+
+        <select name="categoria"
+            class="px-4 py-2 rounded-lg bg-[#0e0e0e] border border-gray-700 text-white">
+            <option value="">Categoría</option>
+            <option value="motor" {% if request.args.get("categoria")=="motor" %}selected{% endif %}>Motor</option>
+            <option value="frenos" {% if request.args.get("categoria")=="frenos" %}selected{% endif %}>Frenos</option>
+            <option value="suspension" {% if request.args.get("categoria")=="suspension" %}selected{% endif %}>Suspensión</option>
+        </select>
+
+        <select name="marca"
+            class="px-4 py-2 rounded-lg bg-[#0e0e0e] border border-gray-700 text-white">
+            <option value="">Marca</option>
+            {% for m in marcas %}
+            <option value="{{ m.nombre }}"
+                {% if request.args.get("marca") == m.nombre %}selected{% endif %}>
+                {{ m.nombre | capitalize }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit"
+            class="bg-yellow-400 text-black px-5 py-2 rounded-lg font-semibold hover:bg-yellow-300 transition">
+            Filtrar
+        </button>
+
+    </form>
+
+    <!-- GRID -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+
+        {% for producto in productos %}
+        <div class="group bg-[#111] rounded-2xl overflow-hidden shadow-lg hover:shadow-yellow-500/20 transition duration-300">
+
+            <!-- IMAGEN -->
+            <div class="w-full h-44 flex items-center justify-center bg-white relative">
+                <span class="absolute top-2 left-2 bg-yellow-400 text-black text-xs px-2 py-1 rounded-md font-semibold">
+                    Nuevo
+                </span>
+
+                <img src="{{ producto.imagen }}" 
+                     class="max-h-full object-contain p-4 group-hover:scale-105 transition duration-300">
+            </div>
+
+            <!-- INFO -->
+            <div class="p-5 space-y-2">
+
+                <h3 class="text-lg font-semibold group-hover:text-yellow-400 transition">
+                    {{ producto.nombre }}
+                </h3>
+
+                <p class="text-sm text-gray-400">
+                    {{ producto.descripcion }}
+                </p>
+
+                <p class="text-xs text-gray-500">
+                    Marca: <span class="text-gray-300">{{ producto.marca | capitalize }}</span>
+                </p>
+
+                <!-- PRECIO + BOTÓN -->
+                <div class="flex items-center justify-between mt-4">
+
+                    <span class="text-2xl font-bold text-yellow-400">
+                        ${{ producto.precio }}
+                    </span>
+
+                    <a href="/agregar/{{ producto.id }}"
+   class="bg-yellow-400 text-black px-4 py-2 rounded-lg font-semibold 
+          hover:bg-yellow-300 hover:scale-105 transition text-sm">
+   Agregar
 </a>
 
-
-<div class="flex-1 max-w-xl relative">
-
-<span class="material-symbols-outlined absolute left-3 top-3 text-gray-400">
-search
-</span>
-
-<input id="buscador"
-type="text"
-placeholder="Buscar autoparte..."
-class="w-full bg-black border border-red-900 rounded-lg py-2 pl-10 pr-4"
-/>
-
-</div>
-
-
-<div class="flex items-center gap-6">
-
-<a href="{{ url_for('carrito') }}" class="relative block">
-
-<span class="material-symbols-outlined text-gray-300 hover:text-white transition">
-shopping_cart
-</span>
-
-<span id="contadorCarrito" class="absolute -top-1 -right-1 bg-red-600 text-xs px-1 rounded">
-0
-</span>
-
-</a>
-
-<div class="flex items-center gap-2 cursor-pointer">
-
-<span class="material-symbols-outlined text-red-600">
-person
-</span>
-
-<span class="text-sm">
-Taller Vega
-</span>
-
-</div>
-
-</div>
-
-</div>
-
-</header>
-
-
-
-<main class="max-w-7xl mx-auto p-8">
-
-<div class="flex justify-between items-center mb-8">
-
-<h2 class="text-2xl font-bold">
-Catálogo de Autopartes
-</h2>
-
-<button onclick="abrirFiltros()" class="flex items-center gap-2 bg-[#2d1616] border border-red-900 hover:bg-red-600 px-4 py-2 rounded text-sm">
-
-<span class="material-symbols-outlined text-red-500">
-tune
-</span>
-
-Filtrar
-
-</button>
-
-</div>
-
-
-
-<div id="productos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-
-<div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4" data-categoria="frenos" data-nombre="balatas">
-
-<img src="{{ url_for('static', filename='img/balatas.webp') }}" class="h-40 mx-auto">
-
-<h3 class="font-semibold mt-3">
-Balatas Cerámicas
-</h3>
-
-<p class="text-green-500 text-xs">En Stock</p>
-
-<p class="font-bold">$619</p>
-
-<button onclick="agregarCarrito()" class="w-full bg-red-600 mt-3 py-2 rounded">
-Agregar
-</button>
-
-</div>
-
-
-<div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4" data-categoria="electricos" data-nombre="alternador">
-
-<img src="{{ url_for('static', filename='img/alternador.jpeg') }}" class="h-40 mx-auto">
-
-<h3 class="font-semibold mt-3">
-Alternador 12V
-</h3>
-
-<p class="text-yellow-400 text-xs">Pocas piezas</p>
-
-<p class="font-bold">$2829</p>
-
-<button onclick="agregarCarrito()" class="w-full bg-red-600 mt-3 py-2 rounded">
-Agregar
-</button>
-
-</div>
-
-
-<div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4" data-categoria="suspension" data-nombre="amortiguador">
-
-<img src="{{ url_for('static', filename='img/amortiguador.jpeg') }}" class="h-40 mx-auto">
-
-<h3 class="font-semibold mt-3">
-Amortiguador
-</h3>
-
-<p class="text-green-500 text-xs">En Stock</p>
-
-<p class="font-bold">$1799</p>
-
-<button onclick="agregarCarrito()" class="w-full bg-red-600 mt-3 py-2 rounded">
-Agregar
-</button>
-
-</div>
-
-
-<div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4" data-categoria="filtros" data-nombre="filtro">
-
-<img src="{{ url_for('static', filename='img/filtro.jpg') }}" class="h-40 mx-auto">
-
-<h3 class="font-semibold mt-3">
-Filtro de Aceite
-</h3>
-
-<p class="text-green-500 text-xs">En Stock</p>
-
-<p class="font-bold">$89</p>
-
-<button onclick="agregarCarrito()" class="w-full bg-red-600 mt-3 py-2 rounded">
-Agregar
-</button>
-
-</div>
-
-
-<div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4" data-categoria="motor" data-nombre="bujias">
-
-<img src="{{ url_for('static', filename='img/bujias.jpeg') }}" class="h-40 mx-auto">
-
-<h3 class="font-semibold mt-3">
-Bujías NGK Iridium
-</h3>
-
-<p class="text-green-500 text-xs">En Stock</p>
-
-<p class="font-bold">$399</p>
-
-<button onclick="agregarCarrito()" class="w-full bg-red-600 mt-3 py-2 rounded">
-Agregar
-</button>
-
-</div>
-
-
-<div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4" data-categoria="electricos" data-nombre="bateria">
-
-<img src="{{ url_for('static', filename='img/bateria.webp') }}" class="h-40 mx-auto">
-
-<h3 class="font-semibold mt-3">
-Batería LTH
-</h3>
-
-<p class="text-green-500 text-xs">En Stock</p>
-
-<p class="font-bold">$2199</p>
-
-<button onclick="agregarCarrito()" class="w-full bg-red-600 mt-3 py-2 rounded">
-Agregar
-</button>
-
-</div>
-
-
-<div class="product-card bg-[#2d1616] border border-red-900 rounded-lg p-4 opacity-70" data-categoria="motor" data-nombre="radiador">
-
-<img src="{{ url_for('static', filename='img/radiador.jpeg') }}" class="h-40 mx-auto">
-
-<h3 class="font-semibold mt-3">
-Radiador
-</h3>
-
-<p class="text-red-500 text-xs">Sin Stock</p>
-
-<p class="font-bold">$1269</p>
-
-<button class="w-full bg-gray-700 mt-3 py-2 rounded">
-Avisarme
-</button>
-
-</div>
-
-</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
 
 </main>
 
+<!-- FOOTER -->
+<footer class="bg-[#0e0e0e] border-t border-gray-800 text-center py-6 text-gray-500 text-sm">
+    © 2026 MACUIN - Autopartes
+</footer>
 
-
-<div id="panelFiltros" class="fixed inset-0 bg-black/70 hidden z-50 justify-center items-center">
-
-<div class="bg-[#1d0d0d] w-[400px] rounded-lg border border-red-900 p-6 space-y-4">
-
-<div class="flex justify-between items-center">
-
-<h2 class="font-bold flex gap-2">
-
-<span class="material-symbols-outlined text-red-600">
-tune
-</span>
-
-Filtros
-
-</h2>
-
-<button onclick="cerrarFiltros()">
-<span class="material-symbols-outlined">close</span>
-</button>
-
+<!-- 🔥 TOAST -->
+<div id="toast" class="fixed bottom-5 right-5 bg-yellow-400 text-black px-5 py-3 rounded-lg shadow-lg opacity-0 translate-y-10 transition duration-300">
+    Producto agregado 🛒
 </div>
-
-
-<label class="flex gap-2">
-<input type="checkbox" value="frenos" class="categoria"> Frenos
-</label>
-
-<label class="flex gap-2">
-<input type="checkbox" value="electricos" class="categoria"> Eléctricos
-</label>
-
-<label class="flex gap-2">
-<input type="checkbox" value="motor" class="categoria"> Motor
-</label>
-
-<label class="flex gap-2">
-<input type="checkbox" value="suspension" class="categoria"> Suspensión
-</label>
-
-<label class="flex gap-2">
-<input type="checkbox" value="filtros" class="categoria"> Filtros
-</label>
-
-
-<button onclick="aplicarFiltros()" class="w-full bg-red-600 py-2 rounded mt-4">
-Aplicar filtros
-</button>
-
-</div>
-
-</div>
-
-
-
 <script>
 
-let carrito=0
-
-function agregarCarrito(){
-carrito++
-document.getElementById("contadorCarrito").innerText=carrito
-}
-
-
-function abrirFiltros(){
-const panel = document.getElementById("panelFiltros")
-panel.classList.remove("hidden")
-panel.classList.add("flex")
-}
-
-function cerrarFiltros(){
-const panel = document.getElementById("panelFiltros")
-panel.classList.add("hidden")
-panel.classList.remove("flex")
-}
-
-
-document.getElementById("buscador").addEventListener("keyup",function(){
-
-let texto=this.value.toLowerCase()
-
-document.querySelectorAll(".product-card").forEach(p=>{
-
-let nombre=p.dataset.nombre
-
-p.style.display=nombre.includes(texto) ? "block" : "none"
-
-})
-
-})
-
-
-function aplicarFiltros(){
-
-let categorias=[...document.querySelectorAll(".categoria:checked")].map(c=>c.value)
-
-document.querySelectorAll(".product-card").forEach(p=>{
-
-if(categorias.length==0){
-p.style.display="block"
-return
-}
-
-p.style.display=categorias.includes(p.dataset.categoria) ? "block":"none"
-
-})
-
-cerrarFiltros()
-
-}
-
-</script>
-
-
+    // Cargar carrito
+    function obtenerCarrito() {
+        return JSON.parse(localStorage.getItem("carrito")) || [];
+    }
+    
+    // Guardar carrito
+    function guardarCarrito(carrito) {
+        localStorage.setItem("carrito", JSON.stringify(carrito));
+    }
+    
+    // Agregar producto
+    function agregarAlCarrito(producto) {
+        let carrito = obtenerCarrito();
+    
+        const existente = carrito.find(p => p.id === producto.id);
+    
+        if (existente) {
+            existente.cantidad++;
+        } else {
+            carrito.push({ ...producto, cantidad: 1 });
+        }
+    
+        guardarCarrito(carrito);
+        actualizarContador();
+        mostrarToast();
+    
+        setTimeout(() => {
+            window.location.href = "/carrito";
+        }, 800);
+    }
+    
+    // Contador
+    function actualizarContador() {
+        const carrito = obtenerCarrito();
+        const total = carrito.reduce((acc, p) => acc + p.cantidad, 0);
+    
+        const contador = document.getElementById("contador-carrito");
+        if (contador) contador.textContent = total;
+    }
+    
+    // Toast animado
+    function mostrarToast() {
+        const toast = document.getElementById("toast");
+    
+        toast.classList.remove("opacity-0", "translate-y-10");
+    
+        setTimeout(() => {
+            toast.classList.add("opacity-0", "translate-y-10");
+        }, 2000);
+    }
+    
+    // Inicializar
+    actualizarContador();
+    
+    </script>
 </body>
 </html>

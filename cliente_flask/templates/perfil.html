@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfil</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body {
+  background: #0e0e0e;
+  color: white;
+  font-family: 'Inter', sans-serif;
+}
+</style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+<!-- NAVBAR -->
+<nav class="fixed top-0 w-full z-50 bg-[#0e0e0e]/80 backdrop-blur border-b border-gray-800">
+  <div class="flex justify-between items-center px-8 py-4">
+
+    <div class="flex items-center gap-3">
+      <img src="/static/img/nuevologo.png" class="h-10">
+      <span class="font-bold text-lg">MACUIN</span>
+    </div>
+
+    <div class="hidden md:flex gap-8 text-sm">
+      <a href="/inicio" class="hover:text-yellow-400">Inicio</a>
+      <a href="/catalogo" class="hover:text-yellow-400">Catálogo</a>
+      <a href="/carrito" class="hover:text-yellow-400">Carrito</a>
+      <a href="/perfil" class="text-yellow-400">Perfil</a>
+    </div>
+
+    <a href="/logout" class="bg-yellow-400 text-black px-4 py-2 rounded-md font-bold hover:bg-yellow-500">
+      Cerrar sesión
+    </a>
+
+  </div>
+</nav>
+
+<main class="pt-24 px-6 pb-10 max-w-6xl mx-auto w-full">
+
+  <!-- PERFIL -->
+  <section class="bg-[#181818] p-6 rounded-2xl shadow-lg mb-8 flex items-center gap-6">
+    <img src="/static/img/user.png" class="w-20 h-20 rounded-full border border-gray-700">
+    
+    <div>
+      <h2 class="text-2xl font-bold">{{ pedidos|length }} pedidos realizados</h2>
+      <p class="text-gray-400">Usuario activo</p>
+    </div>
+  </section>
+
+  <!-- RESUMEN -->
+  <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+    <div class="bg-[#181818] p-5 rounded-2xl shadow">
+      <p class="text-gray-400">Pedidos</p>
+      <h3 class="text-2xl font-bold">{{ pedidos|length }}</h3>
+    </div>
+
+    <div class="bg-[#181818] p-5 rounded-2xl shadow">
+      <p class="text-gray-400">Pendientes</p>
+      <h3 class="text-yellow-400 text-2xl font-bold">
+        {{ pedidos | selectattr("estado", "equalto", "En proceso") | list | length }}
+      </h3>
+    </div>
+
+    <!-- 🔥 YA CORREGIDO -->
+    <div class="bg-[#181818] p-5 rounded-2xl shadow">
+      <p class="text-gray-400">Total gastado</p>
+      <h3 class="text-green-400 text-2xl font-bold">
+        ${{ total_gastado }}
+      </h3>
+    </div>
+
+  </section>
+
+  <!-- PEDIDOS -->
+  <section class="bg-[#181818] p-6 rounded-2xl shadow mb-8">
+    <h3 class="text-xl font-bold mb-4">Tus pedidos</h3>
+
+    {% for pedido in pedidos %}
+    <div class="border border-gray-700 rounded-xl p-4 mb-4">
+
+      <div class="flex justify-between">
+        <p>ID: #{{ loop.index }}</p>
+
+        <span class="{% if pedido.estado == 'En proceso' %}text-yellow-400{% else %}text-green-400{% endif %}">
+          {{ pedido.estado }}
+        </span>
+      </div>
+
+      {% for p in pedido.productos %}
+        <p class="text-gray-400">{{ p.nombre }} - ${{ p.precio }}</p>
+      {% endfor %}
+
+      <p class="font-bold mt-2">
+        Total: ${{ pedido.productos | sum(attribute='precio') }}
+      </p>
+
+    </div>
+    {% endfor %}
+
+  </section>
+
+  <!-- RECIBOS -->
+  <section class="bg-[#181818] p-6 rounded-2xl shadow">
+    <h3 class="text-xl font-bold mb-4"> Recibos</h3>
+
+    {% for pedido in pedidos %}
+    <div class="flex justify-between items-center border-b border-gray-700 py-3">
+
+      <div>
+        <p>Compra #{{ loop.index }}</p>
+        <p class="text-gray-400 text-sm">
+          ${{ pedido.productos | sum(attribute='precio') }}
+        </p>
+      </div>
+
+      <a href="/recibo/{{ loop.index0 }}" 
+         class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg text-sm">
+         Descargar PDF
+      </a>
+
+    </div>
+    {% endfor %}
+
+  </section>
+
+</main>
+<!-- FOOTER -->
+<footer class="bg-[#0e0e0e] border-t border-gray-800 text-center py-6 text-gray-500 text-sm">
+    © 2026 MACUIN - Autopartes
+</footer>
+
+</body>
+</html>

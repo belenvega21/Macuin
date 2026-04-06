@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+cryptography
+pandas
+openpyxl
+python-docx
+reportlab
+jinja2
+requests
+python-multipart
+passlib[bcrypt]
+bcrypt

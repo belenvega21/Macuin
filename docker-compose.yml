@@ -1,4 +1,26 @@
 services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: macuin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build: ./api_fastapi
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    volumes:
+      - ./static:/app/static        # 🔥 CLAVE (arregla tu error)
+      - ./templates:/app/templates  # 🔥 CLAVE
+
   cliente:
     build: ./cliente_flask
     ports:
@@ -10,6 +32,6 @@ services:
     build: ./admin_laravel
     ports:
       - "8001:80"
-    volumes:
-      - ./admin_laravel:/var/www/html
-      - /var/www/html/vendor 
+
+volumes:
+  postgres_data:
