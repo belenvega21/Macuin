@@ -7,19 +7,19 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: macuin
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
   api:
     build: ./api_fastapi
     ports:
-      - "8000:8000"
+      - "8001:8000"
     depends_on:
       - db
     volumes:
-      - ./static:/app/static        # 🔥 CLAVE (arregla tu error)
-      - ./templates:/app/templates  # 🔥 CLAVE
+      - ./cliente_flask/static:/app/static        # ✨ Modificado para apuntar a la carpeta real
+      - ./cliente_flask/templates:/app/templates  # ✨ Modificado para apuntar a la carpeta real
 
   cliente:
     build: ./cliente_flask
@@ -31,7 +31,7 @@ services:
   admin:
     build: ./admin_laravel
     ports:
-      - "8001:80"
+      - "8002:80"
 
 volumes:
   postgres_data:

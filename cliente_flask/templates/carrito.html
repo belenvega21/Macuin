@@ -19,7 +19,6 @@ body {
 
 <body>
 
-<!-- 🔥 NAVBAR -->
 <nav class="fixed top-0 w-full z-50 bg-[#0e0e0e]/80 backdrop-blur border-b border-gray-800">
     <div class="flex justify-between items-center px-8 py-4">
   
@@ -50,7 +49,6 @@ body {
 
 <div class="grid lg:grid-cols-3 gap-12">
 
-<!-- 🛒 LISTA -->
 <div class="lg:col-span-2">
 
 <h2 class="text-5xl font-extrabold mb-10 tracking-tight">
@@ -59,9 +57,37 @@ body {
 
 <div id="carrito-container" class="space-y-6"></div>
 
+    let subtotal = 0;
+</script>
+
+{% if not carrito %}
+<div class="flex flex-col items-center justify-center text-gray-400 text-lg py-12">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 mb-4 text-gray-600">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.198 1.318M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm3.675 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75z" />
+    </svg>
+    Tu carrito está vacío
+</div>
+{% else %}
+    {% for producto in carrito %}
+    <div class="flex items-center justify-between bg-[#111] border border-white/10 rounded-xl p-5 hover:border-yellow-400 transition">
+        <div class="flex items-center gap-5">
+            <img src="{{ producto.imagen }}" 
+                 class="w-28 h-28 object-contain bg-white rounded-lg p-2">
+            <div>
+                <h3 class="text-xl font-bold">{{ producto.nombre }}</h3>
+                <p class="text-sm text-gray-500 mb-1">SKU: <span class="text-gray-300">{{ producto.sku if producto.sku else 'N/A' }}</span></p>
+                <p class="text-gray-400">${{ "{:,.2f}".format(producto.precio) }}</p>
+            </div>
+        </div>
+        <a href="/carrito/eliminar/{{ loop.index0 }}"
+            class="text-red-400 hover:text-red-600 font-semibold">
+            Eliminar
+        </a>
+    </div>
+    {% endfor %}
+{% endif %}
 </div>
 
-<!-- 💰 RESUMEN PRO -->
 <div class="bg-gradient-to-br from-[#111] to-[#0a0a0a] 
             border border-white/10 
             rounded-3xl 
@@ -79,12 +105,12 @@ body {
 
         <div class="flex justify-between">
             <span>Subtotal</span>
-            <span id="subtotal">$0</span>
+            <span id="subtotal">${{ "{:,.2f}".format(total) }}</span>
         </div>
 
         <div class="flex justify-between">
             <span>IVA (16%)</span>
-            <span id="iva">$0</span>
+            <span id="iva">${{ "{:,.2f}".format(total * 0.16) }}</span>
         </div>
 
         <div class="flex justify-between">
@@ -99,22 +125,24 @@ body {
     <div class="flex justify-between items-end">
         <span class="text-lg text-gray-400">Total</span>
         <span id="total" class="text-4xl font-extrabold text-yellow-400">
-            $0
+            ${{ "{:,.2f}".format(total * 1.16) }}
         </span>
     </div>
 
     <div class="mt-8 space-y-4">
 
-        <button class="w-full bg-yellow-400 text-black py-4 rounded-xl font-bold text-lg 
+        {% if carrito %}
+        <a href="/comprar" class="block text-center w-full bg-yellow-400 text-black py-4 rounded-xl font-bold text-lg 
                        hover:scale-[1.03] transition-all shadow-lg">
             Finalizar compra
-        </button>
+        </a>
 
-        <button onclick="vaciarCarrito()" 
-                class="w-full bg-red-500 py-3 rounded-xl font-bold 
+        <a href="/carrito/vaciar" 
+                class="block text-center w-full bg-red-500 py-3 rounded-xl font-bold text-white
                        hover:bg-red-600 transition-all">
             Vaciar carrito
-        </button>
+        </a>
+        {% endif %}
 
     </div>
 
@@ -123,94 +151,10 @@ body {
 </div>
 </main>
 
-<!-- 🧠 SCRIPT -->
-<script>
-
-function obtenerCarrito() {
-    return JSON.parse(localStorage.getItem("carrito")) || [];
-}
-
-function guardarCarrito(carrito) {
-    localStorage.setItem("carrito", JSON.stringify(carrito));
-}
-
-function renderCarrito() {
-
-    const contenedor = document.getElementById("carrito-container");
-    const subtotalSpan = document.getElementById("subtotal");
-    const ivaSpan = document.getElementById("iva");
-    const totalSpan = document.getElementById("total");
-
-    let carrito = obtenerCarrito();
-    contenedor.innerHTML = "";
-
-    let subtotal = 0;
-
-    if (carrito.length === 0) {
-        contenedor.innerHTML = `
-        <div class="text-gray-400 text-lg">
-            Tu carrito está vacío 😢
-        </div>
-        `;
-        return;
-    }
-
-    carrito.forEach((producto, index) => {
-
-        subtotal += producto.precio;
-
-        contenedor.innerHTML += `
-        <div class="flex items-center justify-between bg-[#111] border border-white/10 rounded-xl p-5 hover:border-yellow-400 transition">
-
-            <div class="flex items-center gap-5">
-
-                <img src="${producto.imagen}" 
-                     class="w-28 h-28 object-contain bg-white rounded-lg p-2">
-
-                <div>
-                    <h3 class="text-xl font-bold">${producto.nombre}</h3>
-                    <p class="text-gray-400">$${producto.precio}</p>
-                </div>
-
-            </div>
-
-            <button onclick="eliminarProducto(${index})"
-                class="text-red-400 hover:text-red-600 font-semibold">
-                Eliminar
-            </button>
-
-        </div>
-        `;
-    });
-
-    let iva = subtotal * 0.16;
-    let total = subtotal + iva;
-
-    subtotalSpan.textContent = "$" + subtotal.toFixed(2);
-    ivaSpan.textContent = "$" + iva.toFixed(2);
-    totalSpan.textContent = "$" + total.toFixed(2);
-}
-
-function eliminarProducto(index) {
-    let carrito = obtenerCarrito();
-    carrito.splice(index, 1);
-    guardarCarrito(carrito);
-    renderCarrito();
-}
-
-function vaciarCarrito() {
-    localStorage.removeItem("carrito");
-    renderCarrito();
-}
-
-renderCarrito();
-
-</script>
-
-</body>
 <!-- FOOTER -->
 <footer class="bg-[#0e0e0e] border-t border-gray-800 text-center py-6 text-gray-500 text-sm">
     © 2026 MACUIN - Autopartes
 </footer>
 
+</body>
 </html>

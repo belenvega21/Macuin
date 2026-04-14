@@ -11,4 +11,5 @@ jinja2
 requests
 python-multipart
 passlib[bcrypt]
-bcrypt
+bcrypt==3.2.2
+PyJWT

@@ -61,7 +61,7 @@
         <div class="glass-panel rounded-2xl p-8 w-full">
             <h2 class="text-xl font-bold mb-6 text-center">Inicio de Sesión</h2>
 
-            <form method="POST" action="{{ route('login') }}">
+            <form method="POST" action="{{ route('login') }}" novalidate>
                 @csrf
 
                 <div class="mb-4">
@@ -75,15 +75,18 @@
 
                 <div class="mb-4">
                     <label class="text-xs text-gray-400">Correo de empleado</label>
-                    <input type="email" name="email" required class="w-full mt-1 p-3 bg-black border border-gray-700 rounded focus:border-primary focus:outline-none transition" placeholder="correo@macuin.com">
+                    <input type="email" name="email" value="{{ old('email') }}" class="w-full mt-1 p-3 bg-black border border-gray-700 rounded focus:border-primary focus:outline-none transition" placeholder="correo@macuin.com">
                     @error('email')
-                        <span class="text-primary text-xs mt-1">{{ $message }}</span>
+                        <div class="text-primary text-xs mt-1">{{ $message }}</div>
                     @enderror
                 </div>
 
                 <div class="mb-6">
                     <label class="text-xs text-gray-400">Contraseña</label>
-                    <input type="password" name="password" required class="w-full mt-1 p-3 bg-black border border-gray-700 rounded focus:border-primary focus:outline-none transition" placeholder="********">
+                    <input type="password" name="password" class="w-full mt-1 p-3 bg-black border border-gray-700 rounded focus:border-primary focus:outline-none transition" placeholder="********">
+                    @error('password')
+                        <div class="text-primary text-xs mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <button type="submit" class="w-full bg-yellowaccent text-black font-bold py-3 rounded hover:bg-yellow-400 transition">

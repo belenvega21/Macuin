@@ -22,7 +22,7 @@
 
 <body class="flex flex-col min-h-screen">
 
-<!-- 🔥 NAVBAR -->
+
 <nav class="fixed top-0 w-full z-50 bg-[#0e0e0e]/80 backdrop-blur border-b border-gray-800">
     <div class="flex justify-between items-center px-8 py-4">
   
@@ -35,7 +35,7 @@
         <a href="/inicio" class="text-yellow-400">Inicio</a>
         <a href="/catalogo" class="hover:text-yellow-400">Catálogo</a>
 
-        <!-- 🛒 CARRITO CON CONTADOR -->
+
         <a href="/carrito" class="hover:text-yellow-400 relative">
           Carrito
           <span id="contador-carrito"
@@ -53,10 +53,10 @@
     </div>
 </nav>
 
-<!-- CONTENIDO -->
+
 <main class="flex-1 pt-36 px-6 lg:px-10 pb-10">
 
-    <!-- HEADER -->
+
     <div class="mb-12">
         <h2 class="text-5xl font-extrabold leading-[1.2] pb-3 bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
             Catálogo
@@ -67,7 +67,7 @@
         </p>
     </div>
 
-    <!-- FILTROS -->
+
     <form method="GET" action="/catalogo"
         class="mb-12 flex flex-wrap gap-4 items-center bg-[#111] p-5 rounded-2xl border border-gray-800 shadow-md">
 
@@ -78,9 +78,9 @@
         <select name="categoria"
             class="px-4 py-2 rounded-lg bg-[#0e0e0e] border border-gray-700 text-white">
             <option value="">Categoría</option>
-            <option value="motor" {% if request.args.get("categoria")=="motor" %}selected{% endif %}>Motor</option>
-            <option value="frenos" {% if request.args.get("categoria")=="frenos" %}selected{% endif %}>Frenos</option>
-            <option value="suspension" {% if request.args.get("categoria")=="suspension" %}selected{% endif %}>Suspensión</option>
+            <option value="motor" {% if request.args.get('categoria')=='motor' %}selected{% endif %}>Motor</option>
+            <option value="frenos" {% if request.args.get('categoria')=='frenos' %}selected{% endif %}>Frenos</option>
+            <option value="suspension" {% if request.args.get('categoria')=='suspension' %}selected{% endif %}>Suspensión</option>
         </select>
 
         <select name="marca"
@@ -88,7 +88,7 @@
             <option value="">Marca</option>
             {% for m in marcas %}
             <option value="{{ m.nombre }}"
-                {% if request.args.get("marca") == m.nombre %}selected{% endif %}>
+                {% if request.args.get('marca') == m.nombre %}selected{% endif %}>
                 {{ m.nombre | capitalize }}
             </option>
             {% endfor %}
@@ -101,23 +101,29 @@
 
     </form>
 
-    <!-- GRID -->
+
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
 
         {% for producto in productos %}
         <div class="group bg-[#111] rounded-2xl overflow-hidden shadow-lg hover:shadow-yellow-500/20 transition duration-300">
 
-            <!-- IMAGEN -->
+
             <div class="w-full h-44 flex items-center justify-center bg-white relative">
-                <span class="absolute top-2 left-2 bg-yellow-400 text-black text-xs px-2 py-1 rounded-md font-semibold">
-                    Nuevo
+                {% if producto.stock > 0 %}
+                <span class="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded-md font-semibold">
+                    Disponible ({{ producto.stock }})
                 </span>
+                {% else %}
+                <span class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-md font-semibold">
+                    Agotado
+                </span>
+                {% endif %}
 
                 <img src="{{ producto.imagen }}" 
                      class="max-h-full object-contain p-4 group-hover:scale-105 transition duration-300">
             </div>
 
-            <!-- INFO -->
+
             <div class="p-5 space-y-2">
 
                 <h3 class="text-lg font-semibold group-hover:text-yellow-400 transition">
@@ -130,20 +136,27 @@
 
                 <p class="text-xs text-gray-500">
                     Marca: <span class="text-gray-300">{{ producto.marca | capitalize }}</span>
+                    {% if producto.sku %} | SKU: <span class="text-gray-300">{{ producto.sku }}</span>{% endif %}
                 </p>
 
-                <!-- PRECIO + BOTÓN -->
+
                 <div class="flex items-center justify-between mt-4">
 
                     <span class="text-2xl font-bold text-yellow-400">
                         ${{ producto.precio }}
                     </span>
 
-                    <a href="/agregar/{{ producto.id }}"
+                    {% if producto.stock > 0 %}
+                    <button onclick="agregarAlCarritoBackend('{{ producto.id }}', this)"
    class="bg-yellow-400 text-black px-4 py-2 rounded-lg font-semibold 
           hover:bg-yellow-300 hover:scale-105 transition text-sm">
-   Agregar
-</a>
+   🛒 Agregar
+</button>
+                    {% else %}
+                    <span class="bg-gray-600 text-gray-400 px-4 py-2 rounded-lg font-semibold text-sm cursor-not-allowed">
+                        Agotado
+                    </span>
+                    {% endif %}
 
                 </div>
             </div>
@@ -154,70 +167,64 @@
 
 </main>
 
-<!-- FOOTER -->
+
 <footer class="bg-[#0e0e0e] border-t border-gray-800 text-center py-6 text-gray-500 text-sm">
     © 2026 MACUIN - Autopartes
 </footer>
 
-<!-- 🔥 TOAST -->
+
 <div id="toast" class="fixed bottom-5 right-5 bg-yellow-400 text-black px-5 py-3 rounded-lg shadow-lg opacity-0 translate-y-10 transition duration-300">
-    Producto agregado 🛒
+    <div class="flex items-center gap-2 font-bold">
+        Producto agregado
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+        </svg>
+    </div>
 </div>
 <script>
 
-    // Cargar carrito
-    function obtenerCarrito() {
-        return JSON.parse(localStorage.getItem("carrito")) || [];
+    // Counter variable state
+    let globalCartCount = 0;
+
+    function agregarAlCarritoBackend(productoId, btn) {
+        // Disable temporarily to prevent spam clicks
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '⏳ Agregando...';
+        btn.disabled = true;
+
+        fetch("/agregar/" + productoId, {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => {
+            if (response.redirected && response.url.includes('/login')) {
+                window.location.href = "/login";
+                return;
+            }
+            // Increment local visual counter
+            globalCartCount++;
+            document.getElementById("contador-carrito").textContent = globalCartCount;
+            
+            // Show toast
+            const toast = document.getElementById("toast");
+            toast.classList.remove("opacity-0", "translate-y-10");
+            setTimeout(() => {
+                toast.classList.add("opacity-0", "translate-y-10");
+            }, 2000);
+
+            // Restore button
+            btn.innerHTML = '✔️ Agregado';
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 2000);
+        })
+        .catch(err => {
+            console.error(err);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
     }
-    
-    // Guardar carrito
-    function guardarCarrito(carrito) {
-        localStorage.setItem("carrito", JSON.stringify(carrito));
-    }
-    
-    // Agregar producto
-    function agregarAlCarrito(producto) {
-        let carrito = obtenerCarrito();
-    
-        const existente = carrito.find(p => p.id === producto.id);
-    
-        if (existente) {
-            existente.cantidad++;
-        } else {
-            carrito.push({ ...producto, cantidad: 1 });
-        }
-    
-        guardarCarrito(carrito);
-        actualizarContador();
-        mostrarToast();
-    
-        setTimeout(() => {
-            window.location.href = "/carrito";
-        }, 800);
-    }
-    
-    // Contador
-    function actualizarContador() {
-        const carrito = obtenerCarrito();
-        const total = carrito.reduce((acc, p) => acc + p.cantidad, 0);
-    
-        const contador = document.getElementById("contador-carrito");
-        if (contador) contador.textContent = total;
-    }
-    
-    // Toast animado
-    function mostrarToast() {
-        const toast = document.getElementById("toast");
-    
-        toast.classList.remove("opacity-0", "translate-y-10");
-    
-        setTimeout(() => {
-            toast.classList.add("opacity-0", "translate-y-10");
-        }, 2000);
-    }
-    
-    // Inicializar
-    actualizarContador();
     
     </script>
 </body>

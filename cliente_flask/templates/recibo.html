@@ -15,7 +15,6 @@
 
 <div class="card rounded-lg p-8">
 
-<!-- 🔥 HEADER RECIBO -->
 <div class="flex justify-between border-b border-[#262626] pb-4 mb-6">
 
 <div>
@@ -30,7 +29,6 @@
 
 </div>
 
-<!-- 🔥 INFO -->
 <div class="flex justify-between mb-6 text-sm">
 
 <div>
@@ -45,7 +43,6 @@
 
 </div>
 
-<!-- 🔥 PRODUCTOS -->
 <table class="w-full text-sm">
 
 <thead>
@@ -60,7 +57,6 @@
 
 </table>
 
-<!-- 🔥 TOTALES -->
 <div class="mt-6 border-t border-[#262626] pt-4">
 
 <div class="flex justify-between text-sm">
@@ -80,7 +76,6 @@
 
 </div>
 
-<!-- 🔥 ACCIONES -->
 <div class="flex gap-4 mt-6">
 
 <button onclick="window.print()" 
@@ -107,15 +102,15 @@ Este documento es una representación digital del pedido.
 
 <script>
 
-// 🔥 FECHA ACTUAL
+// fecha actual
 let hoy = new Date();
 document.getElementById("fecha").innerText =
     hoy.toLocaleDateString() + " " + hoy.toLocaleTimeString();
 
-// 🔥 NÚMERO RANDOM DE ORDEN
+// numero de orden
 document.getElementById("orden").innerText = Math.floor(Math.random()*10000);
 
-// 🔥 CARGAR PRODUCTOS
+// cargar productos
 function cargarRecibo(){
 
     let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
@@ -132,7 +127,10 @@ function cargarRecibo(){
 
         contenedor.innerHTML += `
         <tr class="border-b border-[#262626]">
-            <td class="py-3">${p.nombre}</td>
+            <td class="py-3">
+                ${p.nombre}
+                <div class="text-xs text-gray-500 mt-1">SKU: ${p.sku || 'N/A'}</div>
+            </td>
             <td class="text-center">${p.cantidad}</td>
             <td class="text-right">$${totalProducto.toFixed(2)}</td>
         </tr>
@@ -147,7 +145,7 @@ function cargarRecibo(){
     document.getElementById("total").innerText = "$" + total.toFixed(2);
 }
 
-// 🔥 FINALIZAR COMPRA
+// finalizar compra
 function finalizar(){
     localStorage.removeItem("carrito");
     window.location.href = "/inicio";

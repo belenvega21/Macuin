@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Login - MACUIN</title>
-
   <link rel="stylesheet" href="/static/css/auth.css">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
@@ -12,22 +12,21 @@
 
 <div class="container">
 
-  <!-- 🔶 IZQUIERDA -->
+  <!-- IZQUIERDA -->
   <div class="left">
     <div class="overlay">
 
-      <!-- LOGO PRO -->
       <div class="logo-container">
         <img src="/static/img/nuevologo.png" alt="MACUIN Logo">
       </div>
 
       <h4>MACUIN</h4>
-      <p class="subtitle">INDUSTRIAL PRECISION ENGINEERED</p>
+      <p class="subtitle">INGENIERÍA DE PRECISIÓN INDUSTRIAL</p>
 
       <h1>
-        ADVANCED <br>
-        <span>AUTOPARTS</span><br>
-        SOLUTIONS.
+        SOLUCIONES <br>
+        <span>AUTOPARTES</span><br>
+        AVANZADAS.
       </h1>
 
       <p class="desc">
@@ -38,36 +37,62 @@
     </div>
   </div>
 
-  <!-- 🔐 DERECHA -->
+  <!-- DERECHA -->
   <div class="right">
     <div class="card">
 
       <h2>Iniciar sesión</h2>
       <p class="small">Ingresa tus credenciales para continuar</p>
 
-      <!-- ERROR VISUAL -->
+      <!-- ERROR GENERAL -->
       <div id="error-box" class="error-box" style="display:none;">
+        <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle; margin-right:6px;">error</span>
         Correo o contraseña incorrectos
       </div>
 
       <!-- FORM -->
-      <form action="/login" method="POST">
+      <form action="/login" method="POST" novalidate onsubmit="return validarLogin()">
 
-        <label>Correo</label>
-        <input type="email" name="email" placeholder="ejemplo@empresa.com" required>
+        <!-- CORREO -->
+        <label>
+          <span class="material-symbols-outlined label-icon">mail</span>
+          Correo
+        </label>
+        <div class="input-icon">
+          <span class="material-symbols-outlined input-left-icon">alternate_email</span>
+          <input type="email" name="email" id="email" placeholder="ejemplo@empresa.com" class="has-left-icon">
+        </div>
+        <div class="field-error" id="error-email">El correo es obligatorio y debe contener @.</div>
 
-        <label>Contraseña</label>
-        <input type="password" name="password" placeholder="••••••••" required>
+        <!-- CONTRASEÑA -->
+        <label>
+          <span class="material-symbols-outlined label-icon">lock</span>
+          Contraseña
+        </label>
+        <div class="input-icon">
+          <span class="material-symbols-outlined input-left-icon">key</span>
+          <input type="password" name="password" id="password" placeholder="••••••••" class="has-left-icon">
+          <button type="button" class="eye-btn" onclick="togglePassword('password', 'eye-icon')">
+            <span id="eye-icon" class="material-symbols-outlined">visibility_off</span>
+          </button>
+        </div>
+        <div class="field-error" id="error-password">La contraseña es obligatoria.</div>
 
+        <!-- OPCIONES -->
         <div class="options">
-          <label>
-            <input type="checkbox"> Recordarme
+          <label class="remember-label">
+            <input type="checkbox" id="remember-me" class="custom-checkbox">
+            <span class="checkmark"></span>
+            Recordarme
           </label>
 
           <a href="#">¿Olvidaste tu contraseña?</a>
         </div>
 
-        <button type="submit">INGRESAR</button>
+        <button type="submit" class="btn-submit">
+          <span class="material-symbols-outlined" style="font-size:18px; vertical-align:middle; margin-right:6px;">login</span>
+          INGRESAR
+        </button>
 
       </form>
 
@@ -83,10 +108,78 @@
 
 <!-- SCRIPTS -->
 <script>
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("error")) {
-    document.getElementById("error-box").style.display = "block";
+// Mostrar error si la API devolvió error
+const params = new URLSearchParams(window.location.search);
+if (params.get("error")) {
+  document.getElementById("error-box").style.display = "flex";
+}
+
+// Toggle password visibility (ZeroWaste style)
+function togglePassword(inputId, iconId) {
+  const passwordInput = document.getElementById(inputId);
+  const eyeIcon = document.getElementById(iconId);
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    eyeIcon.textContent = 'visibility';
+  } else {
+    passwordInput.type = 'password';
+    eyeIcon.textContent = 'visibility_off';
   }
+}
+
+// Recordarme: cargar email guardado
+window.addEventListener('DOMContentLoaded', () => {
+  const savedEmail = localStorage.getItem('macuin_email');
+  if (savedEmail) {
+    document.getElementById('email').value = savedEmail;
+    document.getElementById('remember-me').checked = true;
+  }
+});
+
+// Validación ZeroWaste style
+function validarLogin() {
+  let valido = true;
+
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+  const errorEmail = document.getElementById("error-email");
+  const errorPassword = document.getElementById("error-password");
+
+  // Reset
+  email.classList.remove("input-error");
+  password.classList.remove("input-error");
+  errorEmail.style.display = "none";
+  errorPassword.style.display = "none";
+
+  // Email
+  if (!email.value || !email.value.includes("@")) {
+    email.classList.add("input-error");
+    errorEmail.style.display = "block";
+    valido = false;
+  }
+
+  // Password
+  if (!password.value || password.value.length < 4) {
+    password.classList.add("input-error");
+    errorPassword.textContent = password.value.length === 0 
+      ? "La contraseña es obligatoria." 
+      : "La contraseña debe tener al menos 4 caracteres.";
+    errorPassword.style.display = "block";
+    valido = false;
+  }
+
+  // Recordarme: guardar/eliminar email
+  if (valido) {
+    const rememberMe = document.getElementById('remember-me');
+    if (rememberMe.checked) {
+      localStorage.setItem('macuin_email', email.value);
+    } else {
+      localStorage.removeItem('macuin_email');
+    }
+  }
+
+  return valido;
+}
 </script>
 
 </body>

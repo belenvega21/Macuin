@@ -7,6 +7,7 @@ class UsuarioBase(BaseModel):
 
 class UsuarioResponse(UsuarioBase):
     id: int
+    imagen_perfil: str | None = None
 
     class Config:
         from_attributes = True

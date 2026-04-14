@@ -9,3 +9,5 @@ class Usuario(Base):
     email = Column(String, unique=True, index=True)
     telefono = Column(String)
     password = Column(String)
+    rol = Column(String, default="cliente")
+    imagen_perfil = Column(String, default="https://via.placeholder.com/150?text=Perfil")

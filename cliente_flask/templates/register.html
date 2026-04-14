@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Registro - MACUIN</title>
-
   <link rel="stylesheet" href="/static/css/auth.css">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
@@ -12,22 +12,21 @@
 
 <div class="container">
 
-  <!-- 🔶 IZQUIERDA -->
+  <!-- IZQUIERDA -->
   <div class="left">
     <div class="overlay">
 
-      <!-- LOGO PRO -->
       <div class="logo-container">
         <img src="/static/img/nuevologo.png" alt="MACUIN Logo">
       </div>
 
       <h4>MACUIN</h4>
-      <p class="subtitle">INDUSTRIAL PRECISION ENGINEERED</p>
+      <p class="subtitle">INGENIERÍA DE PRECISIÓN INDUSTRIAL</p>
 
       <h1>
-        ADVANCED <br>
-        <span>AUTOPARTS</span><br>
-        SOLUTIONS.
+        SOLUCIONES <br>
+        <span>AUTOPARTES</span><br>
+        AVANZADAS.
       </h1>
 
       <p class="desc">
@@ -38,49 +37,90 @@
     </div>
   </div>
 
-  <!-- 📝 DERECHA -->
+  <!-- DERECHA -->
   <div class="right">
     <div class="card">
 
       <h2>Crear cuenta</h2>
       <p class="small">Regístrate para acceder al sistema</p>
 
-      <!-- ERROR VISUAL -->
+      <!-- ERROR GENERAL -->
       <div id="error-box" class="error-box" style="display:none;">
-        Las contraseñas no coinciden
+        <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle; margin-right:6px;">error</span>
+        Error al crear la cuenta. Verifica tus datos.
       </div>
 
       <!-- FORM -->
-      <form action="/auth/registro" method="POST">
+      <form action="/auth/registro" method="POST" novalidate onsubmit="return validarRegistro()">
 
-        <label>Nombre del negocio</label>
-        <input type="text" name="nombre" placeholder="Ej. Refaccionaria López" required>
+        <!-- NOMBRE -->
+        <label>
+          <span class="material-symbols-outlined label-icon">badge</span>
+          Nombre del negocio
+        </label>
+        <div class="input-icon">
+          <span class="material-symbols-outlined input-left-icon">store</span>
+          <input type="text" name="nombre" id="nombre" placeholder="Ej. Refaccionaria López" class="has-left-icon">
+        </div>
+        <div class="field-error" id="error-nombre">El nombre es obligatorio.</div>
 
-        <label>Correo</label>
-        <input type="email" name="email" placeholder="ejemplo@macuin.com" required>
+        <!-- CORREO -->
+        <label>
+          <span class="material-symbols-outlined label-icon">mail</span>
+          Correo
+        </label>
+        <div class="input-icon">
+          <span class="material-symbols-outlined input-left-icon">alternate_email</span>
+          <input type="email" name="email" id="email" placeholder="ejemplo@macuin.com" class="has-left-icon">
+        </div>
+        <div class="field-error" id="error-email">El correo es obligatorio y debe contener @.</div>
 
-        <label>Teléfono</label>
-        <input type="tel" name="telefono" placeholder="4421234567" required>
+        <!-- TELÉFONO -->
+        <label>
+          <span class="material-symbols-outlined label-icon">phone</span>
+          Teléfono
+        </label>
+        <div class="input-icon">
+          <span class="material-symbols-outlined input-left-icon">call</span>
+          <input type="tel" name="telefono" id="telefono" placeholder="4421234567" class="has-left-icon">
+        </div>
+        <div class="field-error" id="error-telefono">El teléfono es obligatorio (mín. 10 dígitos).</div>
 
+        <!-- CONTRASEÑAS -->
         <div class="grid-2">
           <div>
-            <label>Contraseña</label>
+            <label>
+              <span class="material-symbols-outlined label-icon">lock</span>
+              Contraseña
+            </label>
             <div class="input-icon">
-              <input id="password" type="password" name="password" placeholder="••••••••" required>
-              <span onclick="togglePassword('password')">👁️</span>
+              <input id="password" type="password" name="password" placeholder="••••••••">
+              <button type="button" class="eye-btn" onclick="togglePassword('password', 'eye1')">
+                <span id="eye1" class="material-symbols-outlined">visibility_off</span>
+              </button>
             </div>
+            <div class="field-error" id="error-password">La contraseña es obligatoria.</div>
           </div>
 
           <div>
-            <label>Confirmar</label>
+            <label>
+              <span class="material-symbols-outlined label-icon">lock_reset</span>
+              Confirmar
+            </label>
             <div class="input-icon">
-              <input id="confirmar" type="password" name="confirmar" placeholder="••••••••" required>
-              <span onclick="togglePassword('confirmar')">👁️</span>
+              <input id="confirmar" type="password" name="confirmar" placeholder="••••••••">
+              <button type="button" class="eye-btn" onclick="togglePassword('confirmar', 'eye2')">
+                <span id="eye2" class="material-symbols-outlined">visibility_off</span>
+              </button>
             </div>
+            <div class="field-error" id="error-confirmar">Las contraseñas no coinciden.</div>
           </div>
         </div>
 
-        <button type="submit">CREAR CUENTA</button>
+        <button type="submit" class="btn-submit" style="margin-top: 8px;">
+          <span class="material-symbols-outlined" style="font-size:18px; vertical-align:middle; margin-right:6px;">person_add</span>
+          CREAR CUENTA
+        </button>
 
       </form>
 
@@ -96,14 +136,78 @@
 
 <!-- SCRIPTS -->
 <script>
-function togglePassword(id) {
-  const input = document.getElementById(id);
-  input.type = input.type === "password" ? "text" : "password";
+// Toggle password visibility
+function togglePassword(inputId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon = document.getElementById(iconId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.textContent = 'visibility';
+  } else {
+    input.type = 'password';
+    icon.textContent = 'visibility_off';
+  }
 }
 
 const params = new URLSearchParams(window.location.search);
 if (params.get("error")) {
-  document.getElementById("error-box").style.display = "block";
+  document.getElementById("error-box").style.display = "flex";
+}
+
+// Validación ZeroWaste style
+function validarRegistro() {
+  let valido = true;
+
+  const nombre = document.getElementById("nombre");
+  const email = document.getElementById("email");
+  const telefono = document.getElementById("telefono");
+  const password = document.getElementById("password");
+  const confirmar = document.getElementById("confirmar");
+
+  // Reset all
+  [nombre, email, telefono, password, confirmar].forEach(el => el.classList.remove("input-error"));
+  document.querySelectorAll(".field-error").forEach(el => el.style.display = "none");
+
+  // Nombre
+  if (!nombre.value.trim()) {
+    nombre.classList.add("input-error");
+    document.getElementById("error-nombre").style.display = "block";
+    valido = false;
+  }
+
+  // Email
+  if (!email.value || !email.value.includes("@")) {
+    email.classList.add("input-error");
+    document.getElementById("error-email").style.display = "block";
+    valido = false;
+  }
+
+  // Teléfono
+  if (!telefono.value || telefono.value.length < 10) {
+    telefono.classList.add("input-error");
+    document.getElementById("error-telefono").style.display = "block";
+    valido = false;
+  }
+
+  // Contraseña
+  if (!password.value || password.value.length < 4) {
+    password.classList.add("input-error");
+    const err = document.getElementById("error-password");
+    err.textContent = password.value.length === 0
+      ? "La contraseña es obligatoria."
+      : "La contraseña debe tener al menos 4 caracteres.";
+    err.style.display = "block";
+    valido = false;
+  }
+
+  // Confirmar
+  if (password.value !== confirmar.value) {
+    confirmar.classList.add("input-error");
+    document.getElementById("error-confirmar").style.display = "block";
+    valido = false;
+  }
+
+  return valido;
 }
 </script>
 
