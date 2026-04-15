@@ -33,7 +33,8 @@ Route::post('/login', function (Request $request) {
                     'user_name' => $data['nombre'],
                     'user_id' => $data['usuario_id'],
                     'rol' => $data['rol'],
-                    'jwt_token' => $data['access_token']
+                    'jwt_token' => $data['access_token'],
+                    'imagen_perfil' => $data['imagen_perfil'] ?? null
                 ]);
                 return redirect('/admin');
             } else {
@@ -47,6 +48,31 @@ Route::post('/login', function (Request $request) {
 
 Route::get('/login', function () {
     return redirect('/');
+});
+
+// ========== UPLOAD PERFIL ADMIN ==========
+Route::post('/admin/upload-perfil', function (Request $request) {
+    if (!session('admin_logged')) return response()->json(['error' => 'No autorizado'], 401);
+
+    $token = session('jwt_token');
+    $userId = session('user_id');
+
+    if (!$request->hasFile('file')) {
+        return response()->json(['error' => 'No se envió archivo'], 400);
+    }
+
+    $file = $request->file('file');
+    $response = Http::withToken($token)
+        ->attach('file', file_get_contents($file->path()), $file->getClientOriginalName())
+        ->post("http://api:8000/usuarios/{$userId}/upload_perfil");
+
+    if ($response->successful()) {
+        $data = $response->json();
+        session(['imagen_perfil' => $data['url'] ?? null]);
+        return response()->json($data);
+    }
+
+    return response()->json(['error' => 'Error al subir imagen'], $response->status());
 });
 
 

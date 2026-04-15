@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@hasSection('titulo')@yield('titulo') | @endif MACUIN Admin</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -73,24 +74,33 @@
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #facc15; }
 
-        /* Flatpickr Custom Professional Theme */
+        /* Flatpickr Custom Professional Theme (Purple Accent) */
         .flatpickr-calendar {
             background: #111 !important;
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
-            border-radius: 1.5rem !important;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7) !important;
+            border-radius: 1.25rem !important;
             font-family: 'Inter', sans-serif !important;
         }
         .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange {
-            background: #facc15 !important;
-            border-color: #facc15 !important;
-            color: #000 !important;
+            background: #9333ea !important;
+            border-color: #9333ea !important;
+            color: #fff !important;
             font-weight: 800 !important;
         }
-        .flatpickr-day:hover { background: rgba(250, 204, 21, 0.1) !important; color: #facc15 !important; }
+        .flatpickr-day.inRange {
+            background: rgba(147, 51, 234, 0.15) !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+        }
+        .flatpickr-day:hover { background: rgba(147, 51, 234, 0.2) !important; color: #c084fc !important; }
+        .flatpickr-day { color: #ccc !important; }
+        .flatpickr-day.flatpickr-disabled { color: #333 !important; }
         .flatpickr-months .flatpickr-month { background: transparent !important; color: #fff !important; }
-        .flatpickr-current-month .flatpickr-monthDropdown-months { font-weight: 800 !important; }
+        .flatpickr-current-month .flatpickr-monthDropdown-months { font-weight: 800 !important; color: #fff !important; }
         .flatpickr-weekday { color: rgba(255, 255, 255, 0.3) !important; font-weight: 700 !important; }
+        span.flatpickr-prev-month, span.flatpickr-next-month { color: #fff !important; fill: #fff !important; }
+        .numInputWrapper span { display: none !important; }
     </style>
 </head>
 
@@ -157,15 +167,11 @@
         <!-- HEADER (Telegram Glass Blur) -->
         <header class="h-24 glass-header flex items-center justify-between px-8 sm:px-10 sticky top-0 z-40">
             <div class="flex items-center gap-3">
-                <h2 class="text-2xl font-bold tracking-tight hidden sm:block">@hasSection('titulo') @yield('titulo') @else Overview @endif</h2>
-                <span class="px-3 py-1 bg-yellow-400/10 text-yellow-400 text-xs font-bold rounded-full hidden md:block border border-yellow-400/20">Live Status</span>
+                <h2 class="text-2xl font-bold tracking-tight hidden sm:block">@hasSection('titulo') @yield('titulo') @else Vista General @endif</h2>
+                <span class="px-3 py-1 bg-yellow-400/10 text-yellow-400 text-xs font-bold rounded-full hidden md:block border border-yellow-400/20">En Vivo</span>
             </div>
 
             <div class="flex items-center gap-5">
-                <button class="relative text-gray-400 hover:text-white transition w-12 h-12 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10">
-                    <span class="material-symbols-rounded">notifications</span>
-                    <span class="absolute top-3 right-3 w-2 h-2 bg-yellow-400 rounded-full shadow-[0_0_8px_rgba(255,193,7,0.8)]"></span>
-                </button>
                 
                 <div class="flex items-center gap-3 bg-white/5 pl-4 pr-2 py-2 rounded-full border border-white/5">
                     <div class="text-right hidden md:block">
@@ -415,27 +421,41 @@
 
         async function loadDashboard() {
             try {
+                const authHeaders = JWT_TOKEN ? { 'Authorization': 'Bearer ' + JWT_TOKEN } : {};
+                
                 // Fetch basic stats
                 const [autopartes, pedidos] = await Promise.all([
-                    fetch(API + '/autopartes/').then(r => r.json()),
-                    fetch(API + '/pedidos/').then(r => r.json())
+                    fetch(API + '/autopartes/', { headers: authHeaders }).then(r => r.json()),
+                    fetch(API + '/pedidos/', { headers: authHeaders }).then(r => r.json())
                 ]);
 
                 let totalVentas = 0;
                 const apMap = {};
-                autopartes.forEach(a => apMap[a.id] = a);
+                if(Array.isArray(autopartes)) autopartes.forEach(a => apMap[a.id] = a);
 
-                pedidos.forEach(p => {
-                    if(p.estado !== 'cancelado') {
-                        (p.productos || []).forEach(prod => {
-                            if(apMap[prod.autoparte_id]) totalVentas += apMap[prod.autoparte_id].precio * prod.cantidad;
-                        });
-                    }
-                });
+                let monthlyCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                
+                if(Array.isArray(pedidos)) {
+                    pedidos.forEach(p => {
+                        if(p.estado !== 'cancelado') {
+                            (p.productos || []).forEach(prod => {
+                                if(apMap[prod.autoparte_id]) totalVentas += apMap[prod.autoparte_id].precio * prod.cantidad;
+                            });
+                            
+                            // Agrupar órdenes por mes
+                            if(p.fecha) {
+                                const fechaStr = p.fecha.toString();
+                                const sanitizedDate = fechaStr.includes('T') ? fechaStr : fechaStr.replace(' ', 'T');
+                                const m = new Date(sanitizedDate).getMonth();
+                                if(m >= 0 && m <= 11) monthlyCounts[m]++;
+                            }
+                        }
+                    });
+                }
 
                 document.getElementById('stat-ventas').textContent = '$' + totalVentas.toLocaleString('en-US', {minimumFractionDigits: 2});
-                document.getElementById('stat-pendientes').textContent = pedidos.filter(p => ['recibido', 'en_proceso'].includes(p.estado)).length;
-                document.getElementById('stat-stock-bajo').textContent = autopartes.filter(a => a.stock < 5).length;
+                document.getElementById('stat-pendientes').textContent = (Array.isArray(pedidos) ? pedidos : []).filter(p => ['recibido', 'en_proceso'].includes(p.estado)).length;
+                document.getElementById('stat-stock-bajo').textContent = (Array.isArray(autopartes) ? autopartes : []).filter(a => a.stock < 5).length;
                 
                 // Chart Setup (Modern Minimalist)
                 Chart.defaults.color = '#71717a';
@@ -448,14 +468,15 @@
                 gradient.addColorStop(0, 'rgba(250, 204, 21, 0.5)'); // yellow-400
                 gradient.addColorStop(1, 'rgba(250, 204, 21, 0.0)');
 
-                const etiquetas = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'];
-                new Chart(ctx, {
+                const etiquetas = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+                if (window.pedidosChart) window.pedidosChart.destroy();
+                window.pedidosChart = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: etiquetas,
                         datasets: [{
-                            label: 'Volumen',
-                            data: [12, 19, 15, 25, 22, pedidos.length],
+                            label: 'Órdenes',
+                            data: monthlyCounts,
                             borderColor: '#facc15',
                             backgroundColor: gradient,
                             borderWidth: 3,
@@ -471,21 +492,66 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
+                        plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
                         scales: {
                             x: { grid: { display: false }, border: { display: false } },
-                            y: { beginAtZero: true, border: { display: false }, grid: { color: 'rgba(255,255,255,0.03)' } }
+                            y: { beginAtZero: true, border: { display: false }, grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { precision: 0 } }
                         }
                     }
                 });
 
                 // Load users via FastAPI
                 fetchUsuarios();
-                const uRes = await fetch(API + '/usuarios/', {
-                    headers: JWT_TOKEN ? { 'Authorization': 'Bearer ' + JWT_TOKEN } : {}
-                });
+                const uRes = await fetch(API + '/usuarios/', { headers: authHeaders });
                 const usrData = await uRes.json();
                 if(Array.isArray(usrData)) document.getElementById('stat-clientes').textContent = usrData.length;
+
+                // Actualización en tiempo real (cada 5 segundos)
+                if (!window.realtimeInterval) {
+                    window.realtimeInterval = setInterval(async () => {
+                        try {
+                            const [autoRes, pedRes] = await Promise.all([
+                                fetch(API + '/autopartes/', { headers: authHeaders }),
+                                fetch(API + '/pedidos/', { headers: authHeaders })
+                            ]);
+                            if (autoRes.ok && pedRes.ok) {
+                                const npedidos = await pedRes.json();
+                                const nautopartes = await autoRes.json();
+                                
+                                let ntotalVentas = 0;
+                                const napMap = {};
+                                if (Array.isArray(nautopartes)) nautopartes.forEach(a => napMap[a.id] = a);
+
+                                let nMonthlyCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+                                if (Array.isArray(npedidos)) {
+                                    npedidos.forEach(p => {
+                                        if(p.estado !== 'cancelado') {
+                                            (p.productos || []).forEach(prod => {
+                                                if(napMap[prod.autoparte_id]) ntotalVentas += napMap[prod.autoparte_id].precio * prod.cantidad;
+                                            });
+                                            if(p.fecha) {
+                                                const fechaStr = p.fecha.toString();
+                                                const sanitizedDate = fechaStr.includes('T') ? fechaStr : fechaStr.replace(' ', 'T');
+                                                const m = new Date(sanitizedDate).getMonth();
+                                                if(m >= 0 && m <= 11) nMonthlyCounts[m]++;
+                                            }
+                                        }
+                                    });
+                                }
+
+                                document.getElementById('stat-ventas').textContent = '$' + ntotalVentas.toLocaleString('en-US', {minimumFractionDigits: 2});
+                                document.getElementById('stat-pendientes').textContent = (Array.isArray(npedidos) ? npedidos : []).filter(p => ['recibido', 'en_proceso'].includes(p.estado)).length;
+                                document.getElementById('stat-stock-bajo').textContent = (Array.isArray(nautopartes) ? nautopartes : []).filter(a => a.stock < 5).length;
+                                
+                                if (window.pedidosChart) {
+                                    window.pedidosChart.data.datasets[0].data = nMonthlyCounts;
+                                    window.pedidosChart.update();
+                                }
+                            }
+                        } catch(err) { console.error("Error en update real-time", err); }
+                    }, 5000);
+                }
 
             } catch(e) {
                 console.error(e);
@@ -496,28 +562,22 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            const userId = '{{ session("user_id") }}';
-            if (!userId) {
-                Toast.fire({ icon: 'error', title: 'Usuario no identificado' });
-                return;
-            }
-
             const formData = new FormData();
             formData.append('file', file);
 
-            Toast.fire({ icon: 'info', title: 'Subiendo imagen...', timer: 1000 });
+            Toast.fire({ icon: 'info', title: 'Subiendo imagen...', timer: 1500 });
 
             try {
-                const res = await fetch(`${API}/usuarios/${userId}/upload_perfil`, {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                const res = await fetch('/admin/upload-perfil', {
                     method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + JWT_TOKEN },
+                    headers: csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {},
                     body: formData
                 });
                 const data = await res.json();
 
-                if (res.ok) {
-                    Toast.fire({ icon: 'success', title: 'Perfil actualizado Maestro' });
-                    // Actualizar imagen en vivo
+                if (res.ok && data.url) {
+                    Toast.fire({ icon: 'success', title: 'Foto de perfil actualizada' });
                     const img = document.getElementById('img-perfil-admin');
                     const icon = document.getElementById('img-perfil-icon');
                     img.src = data.url;
@@ -528,7 +588,7 @@
                 }
             } catch (e) {
                 console.error(e);
-                Toast.fire({ icon: 'error', title: 'Falló la subida' });
+                Toast.fire({ icon: 'error', title: 'Error al subir la imagen' });
             }
         }
 

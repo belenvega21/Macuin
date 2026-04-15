@@ -137,47 +137,120 @@ def exportar_inventario_excel(db: Session = Depends(get_db)):
 # inventario word
 @router.get("/inventario/word")
 def exportar_inventario_word(db: Session = Depends(get_db)):
-    from docx.shared import Inches, Pt, RGBColor
+    from docx.shared import Inches, Pt, RGBColor, Cm, Emu
     from docx.enum.table import WD_TABLE_ALIGNMENT
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.oxml.ns import qn
     productos = db.query(Autoparte).all()
 
     doc = Document()
-    doc.add_heading("MACUIN AUTOPARTES", 0)
-    doc.add_heading("Reporte de Inventario", level=2)
-    doc.add_paragraph(f"Total de referencias: {len(productos)} piezas únicas")
-    doc.add_paragraph("")
+    
+    # Page margins
+    for section in doc.sections:
+        section.left_margin = Cm(1.5)
+        section.right_margin = Cm(1.5)
+        section.top_margin = Cm(2)
+        section.bottom_margin = Cm(2)
 
+    # Title Block
+    title = doc.add_paragraph()
+    title.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    run = title.add_run('MACUIN')
+    run.font.size = Pt(28)
+    run.bold = True
+    run.font.color.rgb = RGBColor(0x1e, 0x29, 0x3b)
+    run = title.add_run('  AUTOPARTES')
+    run.font.size = Pt(14)
+    run.font.color.rgb = RGBColor(0xb0, 0xb0, 0xb0)
+
+    subtitle = doc.add_paragraph()
+    subtitle.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    run = subtitle.add_run('Catálogo de Inventario')
+    run.font.size = Pt(16)
+    run.bold = True
+    run.font.color.rgb = RGBColor(0x33, 0x33, 0x33)
+    run = subtitle.add_run(f'\nDocumento Oficial  •  Generado: {datetime.now().strftime("%d/%m/%Y %H:%M")}')
+    run.font.size = Pt(9)
+    run.font.color.rgb = RGBColor(0x88, 0x88, 0x88)
+
+    # Summary
+    total_valor = sum(p.precio * p.stock for p in productos)
+    p_info = doc.add_paragraph()
+    run = p_info.add_run(f'Total de referencias: ')
+    run.font.size = Pt(10)
+    run.font.color.rgb = RGBColor(0x33, 0x41, 0x55)
+    run = p_info.add_run(f'{len(productos)} piezas únicas')
+    run.font.size = Pt(10)
+    run.bold = True
+    run = p_info.add_run(f'   |   Valoración Total: ')
+    run.font.size = Pt(10)
+    run.font.color.rgb = RGBColor(0x33, 0x41, 0x55)
+    run = p_info.add_run(f'${total_valor:,.2f}')
+    run.font.size = Pt(10)
+    run.bold = True
+    run.font.color.rgb = RGBColor(0x10, 0xb9, 0x81)
+
+    doc.add_paragraph('')
+
+    # Table
     table = doc.add_table(rows=1, cols=6)
-    table.style = "Table Grid"
+    table.style = 'Table Grid'
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
-    headers = ["SKU", "Nombre", "Marca", "Categoría", "Precio", "Stock"]
+    headers = ['SKU', 'Nombre / Descripción', 'Marca', 'Categoría', 'Precio', 'Stock']
     hdr = table.rows[0]
     for i, h in enumerate(headers):
         cell = hdr.cells[i]
-        cell.text = h
-        for p in cell.paragraphs:
-            for run in p.runs:
-                run.bold = True
-                run.font.size = Pt(9)
-                run.font.color.rgb = RGBColor(255, 255, 255)
-        from docx.oxml.ns import qn
+        cell.text = ''
+        p = cell.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        run = p.add_run(h)
+        run.bold = True
+        run.font.size = Pt(9)
+        run.font.color.rgb = RGBColor(255, 255, 255)
+        run.font.name = 'Calibri'
         shading = cell._element.get_or_add_tcPr()
-        shading_elm = shading.makeelement(qn('w:shd'), {qn('w:fill'): '333333', qn('w:val'): 'clear'})
+        shading_elm = shading.makeelement(qn('w:shd'), {qn('w:fill'): '1e293b', qn('w:val'): 'clear'})
         shading.append(shading_elm)
 
-    for prod in productos:
+    for idx, prod in enumerate(productos):
         row = table.add_row().cells
-        row[0].text = prod.sku or "N/A"
+        row[0].text = prod.sku or 'N/A'
         row[1].text = prod.nombre
-        row[2].text = prod.marca or ""
-        row[3].text = prod.categoria or ""
-        row[4].text = f"${prod.precio:,.2f}"
-        row[5].text = f"{prod.stock} pz"
+        row[2].text = prod.marca or ''
+        row[3].text = prod.categoria or ''
+        row[4].text = f'${prod.precio:,.2f}'
+        stock_text = f'{prod.stock} pz'
+        row[5].text = stock_text
+        
+        # Alternating row colors
+        if idx % 2 == 0:
+            for cell in row:
+                shading = cell._element.get_or_add_tcPr()
+                shading_elm = shading.makeelement(qn('w:shd'), {qn('w:fill'): 'f8fafc', qn('w:val'): 'clear'})
+                shading.append(shading_elm)
+        
+        # Font styling for all cells
+        for j, cell in enumerate(row):
+            for p in cell.paragraphs:
+                for run in p.runs:
+                    run.font.size = Pt(9)
+                    run.font.name = 'Calibri'
+                    if j == 4:
+                        run.bold = True
+                    if j == 5:
+                        run.font.color.rgb = RGBColor(0x10, 0xb9, 0x81) if prod.stock > 10 else RGBColor(0xef, 0x44, 0x44)
+                        run.bold = True
+
+    # Column widths
+    widths = [Cm(2.5), Cm(6), Cm(3), Cm(3), Cm(2.5), Cm(2)]
+    for row in table.rows:
+        for idx, width in enumerate(widths):
+            row.cells[idx].width = width
 
     import tempfile, os
-    file_path = os.path.join(tempfile.gettempdir(), "reporte_inventario.docx")
+    file_path = os.path.join(tempfile.gettempdir(), 'reporte_inventario.docx')
     doc.save(file_path)
-    return FileResponse(file_path, filename="reporte_inventario.docx")
+    return FileResponse(file_path, filename='reporte_inventario.docx')
 
 
 # inventario pdf
@@ -333,42 +406,98 @@ def exportar_clientes_excel(db: Session = Depends(get_db)):
 # clientes word
 @router.get("/clientes/word")
 def exportar_clientes_word(db: Session = Depends(get_db)):
-    from docx.shared import Pt, RGBColor
+    from docx.shared import Pt, RGBColor, Cm
     from docx.enum.table import WD_TABLE_ALIGNMENT
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.oxml.ns import qn
     usuarios = db.query(Usuario).all()
+    
     doc = Document()
-    doc.add_heading("MACUIN AUTOPARTES", 0)
-    doc.add_heading("Directorio de Clientes", level=2)
-    doc.add_paragraph(f"N° de socios: {len(usuarios)} registrados")
-    doc.add_paragraph("")
+    for section in doc.sections:
+        section.left_margin = Cm(1.5)
+        section.right_margin = Cm(1.5)
+        section.top_margin = Cm(2)
+        section.bottom_margin = Cm(2)
+
+    # Title
+    title = doc.add_paragraph()
+    run = title.add_run('MACUIN')
+    run.font.size = Pt(28)
+    run.bold = True
+    run.font.color.rgb = RGBColor(0x1e, 0x29, 0x3b)
+    run = title.add_run('  AUTOPARTES')
+    run.font.size = Pt(14)
+    run.font.color.rgb = RGBColor(0xb0, 0xb0, 0xb0)
+
+    subtitle = doc.add_paragraph()
+    run = subtitle.add_run('Directorio de Clientes')
+    run.font.size = Pt(16)
+    run.bold = True
+    run.font.color.rgb = RGBColor(0x33, 0x33, 0x33)
+    run = subtitle.add_run(f'\nDocumento Oficial  •  Generado: {datetime.now().strftime("%d/%m/%Y %H:%M")}')
+    run.font.size = Pt(9)
+    run.font.color.rgb = RGBColor(0x88, 0x88, 0x88)
+
+    admins = len([u for u in usuarios if u.rol == 'admin'])
+    clients = len([u for u in usuarios if u.rol != 'admin'])
+    p_info = doc.add_paragraph()
+    run = p_info.add_run(f'N° de socios: {len(usuarios)} registrados  |  Clientes: {clients}  |  Administradores: {admins}')
+    run.font.size = Pt(10)
+    run.font.color.rgb = RGBColor(0x33, 0x41, 0x55)
+
+    doc.add_paragraph('')
+
     table = doc.add_table(rows=1, cols=5)
-    table.style = "Table Grid"
+    table.style = 'Table Grid'
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
-    headers = ["ID", "Nombre / Razón Social", "Contacto", "Teléfono", "Rol"]
+    headers = ['ID', 'Nombre / Razón Social', 'Contacto', 'Teléfono', 'Rol']
     hdr = table.rows[0]
     for i, h in enumerate(headers):
         cell = hdr.cells[i]
-        cell.text = h
-        for p in cell.paragraphs:
-            for run in p.runs:
-                run.bold = True
-                run.font.size = Pt(9)
-                run.font.color.rgb = RGBColor(255, 255, 255)
-        from docx.oxml.ns import qn
+        cell.text = ''
+        p = cell.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        run = p.add_run(h)
+        run.bold = True
+        run.font.size = Pt(9)
+        run.font.color.rgb = RGBColor(255, 255, 255)
+        run.font.name = 'Calibri'
         shading = cell._element.get_or_add_tcPr()
-        shading_elm = shading.makeelement(qn('w:shd'), {qn('w:fill'): '333333', qn('w:val'): 'clear'})
+        shading_elm = shading.makeelement(qn('w:shd'), {qn('w:fill'): '1e293b', qn('w:val'): 'clear'})
         shading.append(shading_elm)
-    for u in usuarios:
+
+    for idx, u in enumerate(usuarios):
         row = table.add_row().cells
-        row[0].text = f"#{u.id}"
+        row[0].text = f'#{u.id}'
         row[1].text = u.nombre
         row[2].text = u.email
-        row[3].text = u.telefono or "N/A"
-        row[4].text = u.rol
+        row[3].text = u.telefono or 'N/A'
+        row[4].text = u.rol.upper()
+        
+        if idx % 2 == 0:
+            for cell in row:
+                shading = cell._element.get_or_add_tcPr()
+                shading_elm = shading.makeelement(qn('w:shd'), {qn('w:fill'): 'f8fafc', qn('w:val'): 'clear'})
+                shading.append(shading_elm)
+        
+        for j, cell in enumerate(row):
+            for p in cell.paragraphs:
+                for run in p.runs:
+                    run.font.size = Pt(9)
+                    run.font.name = 'Calibri'
+                    if j == 4:
+                        run.bold = True
+                        run.font.color.rgb = RGBColor(0x3b, 0x82, 0xf6) if u.rol == 'admin' else RGBColor(0x64, 0x74, 0x8b)
+
+    widths = [Cm(1.5), Cm(5), Cm(5.5), Cm(3), Cm(3)]
+    for row in table.rows:
+        for idx, width in enumerate(widths):
+            row.cells[idx].width = width
+
     import tempfile, os
-    file_path = os.path.join(tempfile.gettempdir(), "reporte_clientes.docx")
+    file_path = os.path.join(tempfile.gettempdir(), 'reporte_clientes.docx')
     doc.save(file_path)
-    return FileResponse(file_path, filename="reporte_clientes.docx")
+    return FileResponse(file_path, filename='reporte_clientes.docx')
 
 
 # clientes pdf
@@ -475,48 +604,142 @@ def exportar_pedidos_excel(start_date: Optional[str] = Query(None), end_date: Op
 # pedidos word
 @router.get("/pedidos/word")
 def exportar_pedidos_word(start_date: Optional[str] = Query(None), end_date: Optional[str] = Query(None), db: Session = Depends(get_db)):
-    from docx.shared import Pt, RGBColor
+    from docx.shared import Pt, RGBColor, Cm
     from docx.enum.table import WD_TABLE_ALIGNMENT
-    from datetime import datetime
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.oxml.ns import qn
     query = db.query(Pedido)
     if start_date:
         query = query.filter(Pedido.fecha >= datetime.fromisoformat(start_date))
     if end_date:
         query = query.filter(Pedido.fecha <= datetime.fromisoformat(end_date))
     pedidos_db = query.all()
+    usuarios = {u.id: u for u in db.query(Usuario).all()}
+    autopartes_map = {a.id: a for a in db.query(Autoparte).all()}
+
     doc = Document()
-    doc.add_heading("MACUIN AUTOPARTES", 0)
-    doc.add_heading("Reporte Histórico de Pedidos", level=2)
-    doc.add_paragraph(f"Total: {len(pedidos_db)} pedidos procesados")
-    doc.add_paragraph("")
-    table = doc.add_table(rows=1, cols=4)
-    table.style = "Table Grid"
+    for section in doc.sections:
+        section.left_margin = Cm(1.5)
+        section.right_margin = Cm(1.5)
+
+    # Title
+    title = doc.add_paragraph()
+    run = title.add_run('MACUIN')
+    run.font.size = Pt(28)
+    run.bold = True
+    run.font.color.rgb = RGBColor(0x1e, 0x29, 0x3b)
+    run = title.add_run('  AUTOPARTES')
+    run.font.size = Pt(14)
+    run.font.color.rgb = RGBColor(0xb0, 0xb0, 0xb0)
+
+    subtitle = doc.add_paragraph()
+    run = subtitle.add_run('Reporte Histórico de Pedidos')
+    run.font.size = Pt(16)
+    run.bold = True
+    run.font.color.rgb = RGBColor(0x33, 0x33, 0x33)
+    fecha_info = f'\nDocumento Oficial  •  Generado: {datetime.now().strftime("%d/%m/%Y %H:%M")}'
+    if start_date or end_date:
+        fecha_info += f'  •  Periodo: {(start_date or "Inicio").split("T")[0]} al {(end_date or "Actualidad").split("T")[0]}'
+    run = subtitle.add_run(fecha_info)
+    run.font.size = Pt(9)
+    run.font.color.rgb = RGBColor(0x88, 0x88, 0x88)
+
+    # Compute totals
+    total_ingresos = 0
+    for p in pedidos_db:
+        if p.estado != 'cancelado':
+            detalles = db.query(DetallePedido).filter(DetallePedido.pedido_id == p.id).all()
+            for d in detalles:
+                ap = autopartes_map.get(d.autoparte_id)
+                if ap:
+                    total_ingresos += ap.precio * d.cantidad
+
+    p_info = doc.add_paragraph()
+    run = p_info.add_run(f'Total: {len(pedidos_db)} pedidos procesados  |  Ingresos: ')
+    run.font.size = Pt(10)
+    run.font.color.rgb = RGBColor(0x33, 0x41, 0x55)
+    run = p_info.add_run(f'${total_ingresos:,.2f}')
+    run.font.size = Pt(10)
+    run.bold = True
+    run.font.color.rgb = RGBColor(0x10, 0xb9, 0x81)
+
+    doc.add_paragraph('')
+
+    table = doc.add_table(rows=1, cols=6)
+    table.style = 'Table Grid'
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
-    headers = ["Pedido", "Usuario ID", "Estado", "Artículos"]
+    headers = ['Pedido', 'Cliente', 'Fecha', 'Estado', 'Artículos', 'Total']
     hdr = table.rows[0]
     for i, h in enumerate(headers):
         cell = hdr.cells[i]
-        cell.text = h
-        for p in cell.paragraphs:
-            for run in p.runs:
-                run.bold = True
-                run.font.size = Pt(9)
-                run.font.color.rgb = RGBColor(255, 255, 255)
-        from docx.oxml.ns import qn
+        cell.text = ''
+        p = cell.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        run = p.add_run(h)
+        run.bold = True
+        run.font.size = Pt(9)
+        run.font.color.rgb = RGBColor(255, 255, 255)
+        run.font.name = 'Calibri'
         shading = cell._element.get_or_add_tcPr()
-        shading_elm = shading.makeelement(qn('w:shd'), {qn('w:fill'): '333333', qn('w:val'): 'clear'})
+        shading_elm = shading.makeelement(qn('w:shd'), {qn('w:fill'): '1e293b', qn('w:val'): 'clear'})
         shading.append(shading_elm)
-    for p in pedidos_db:
+
+    for idx, p in enumerate(pedidos_db):
         detalles = db.query(DetallePedido).filter(DetallePedido.pedido_id == p.id).all()
+        subtotal = sum((autopartes_map.get(d.autoparte_id).precio * d.cantidad) if autopartes_map.get(d.autoparte_id) else 0 for d in detalles)
+        usr = usuarios.get(p.usuario_id)
         row = table.add_row().cells
-        row[0].text = f"ORD-{str(p.id).zfill(4)}"
-        row[1].text = f"ID: {p.usuario_id}"
-        row[2].text = p.estado
-        row[3].text = f"{len(detalles)} items"
+        row[0].text = f'ORD-{str(p.id).zfill(4)}'
+        row[1].text = usr.nombre if usr else f'ID:{p.usuario_id}'
+        row[2].text = str(p.fecha).split('T')[0].split(' ')[0] if p.fecha else 'N/A'
+        row[3].text = p.estado.upper().replace('_', ' ')
+        row[4].text = f'{len(detalles)} items'
+        row[5].text = f'${subtotal:,.2f}'
+        
+        # Status color
+        estado_colors = {'RECIBIDO': 'dbeafe', 'EN PROCESO': 'fef3c7', 'EN RUTA': 'e0f2fe', 'ENTREGADO': 'd1fae5', 'CANCELADO': 'fee2e2'}
+        status_bg = estado_colors.get(p.estado.upper().replace('_', ' '), 'ffffff')
+        shading = row[3]._element.get_or_add_tcPr()
+        shading_elm = shading.makeelement(qn('w:shd'), {qn('w:fill'): status_bg, qn('w:val'): 'clear'})
+        shading.append(shading_elm)
+        
+        if idx % 2 == 0:
+            for ci in [0,1,2,4,5]:
+                shading = row[ci]._element.get_or_add_tcPr()
+                shading_elm = shading.makeelement(qn('w:shd'), {qn('w:fill'): 'f8fafc', qn('w:val'): 'clear'})
+                shading.append(shading_elm)
+        
+        for j, cell in enumerate(row):
+            for par in cell.paragraphs:
+                for run in par.runs:
+                    run.font.size = Pt(9)
+                    run.font.name = 'Calibri'
+                    if j == 0:
+                        run.bold = True
+                        run.font.color.rgb = RGBColor(0x33, 0x41, 0x55)
+                    if j == 5:
+                        run.bold = True
+
+    widths = [Cm(2.5), Cm(4), Cm(2.5), Cm(3), Cm(2), Cm(3)]
+    for row in table.rows:
+        for idx, width in enumerate(widths):
+            row.cells[idx].width = width
+
+    # Total row at bottom
+    doc.add_paragraph('')
+    p_total = doc.add_paragraph()
+    run = p_total.add_run(f'Ingresos Totales: ')
+    run.font.size = Pt(14)
+    run.font.color.rgb = RGBColor(0x33, 0x41, 0x55)
+    run = p_total.add_run(f'${total_ingresos:,.2f}')
+    run.font.size = Pt(18)
+    run.bold = True
+    run.font.color.rgb = RGBColor(0x10, 0xb9, 0x81)
+
     import tempfile, os
-    file_path = os.path.join(tempfile.gettempdir(), "reporte_pedidos.docx")
+    file_path = os.path.join(tempfile.gettempdir(), 'reporte_pedidos.docx')
     doc.save(file_path)
-    return FileResponse(file_path, filename="reporte_pedidos.docx")
+    return FileResponse(file_path, filename='reporte_pedidos.docx')
 
 
 # pedidos pdf
@@ -727,8 +950,10 @@ def exportar_ventas_excel(start_date: Optional[str] = Query(None), end_date: Opt
 # ventas word
 @router.get("/ventas/word")
 def exportar_ventas_word(start_date: Optional[str] = Query(None), end_date: Optional[str] = Query(None), db: Session = Depends(get_db)):
-    from docx.shared import Pt, RGBColor
+    from docx.shared import Pt, RGBColor, Cm
     from docx.enum.table import WD_TABLE_ALIGNMENT
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.oxml.ns import qn
     query = db.query(DetallePedido).join(Pedido, DetallePedido.pedido_id == Pedido.id)
     if start_date:
         query = query.filter(Pedido.fecha >= datetime.fromisoformat(start_date))
@@ -736,45 +961,106 @@ def exportar_ventas_word(start_date: Optional[str] = Query(None), end_date: Opti
         query = query.filter(Pedido.fecha <= datetime.fromisoformat(end_date))
     detalles = query.all()
     autopartes = {a.id: a for a in db.query(Autoparte).all()}
+
     doc = Document()
-    doc.add_heading("MACUIN AUTOPARTES", 0)
-    doc.add_heading("Reporte Analítico: Artículos Vendidos", level=2)
-    doc.add_paragraph(f"Operaciones totales registradas: {len(detalles)} movimientos")
-    doc.add_paragraph("")
+    for section in doc.sections:
+        section.left_margin = Cm(1.5)
+        section.right_margin = Cm(1.5)
+
+    # Title
+    title = doc.add_paragraph()
+    run = title.add_run('MACUIN')
+    run.font.size = Pt(28)
+    run.bold = True
+    run.font.color.rgb = RGBColor(0x1e, 0x29, 0x3b)
+    run = title.add_run('  AUTOPARTES')
+    run.font.size = Pt(14)
+    run.font.color.rgb = RGBColor(0xb0, 0xb0, 0xb0)
+
+    subtitle = doc.add_paragraph()
+    run = subtitle.add_run('Reporte Analítico de Ventas')
+    run.font.size = Pt(16)
+    run.bold = True
+    run.font.color.rgb = RGBColor(0x33, 0x33, 0x33)
+    fecha_info = f'\nDocumento Oficial  •  Generado: {datetime.now().strftime("%d/%m/%Y %H:%M")}'
+    if start_date or end_date:
+        fecha_info += f'  •  Periodo: {(start_date or "Inicio").split("T")[0]} al {(end_date or "Actualidad").split("T")[0]}'
+    run = subtitle.add_run(fecha_info)
+    run.font.size = Pt(9)
+    run.font.color.rgb = RGBColor(0x88, 0x88, 0x88)
+
+    doc.add_paragraph('')
+
     table = doc.add_table(rows=1, cols=4)
-    table.style = "Table Grid"
+    table.style = 'Table Grid'
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
-    headers = ["Autoparte", "Precio Unit.", "Cant.", "Subtotal"]
+    headers = ['Autoparte', 'Precio Unitario', 'Cantidad', 'Subtotal']
     hdr = table.rows[0]
     for i, h in enumerate(headers):
         cell = hdr.cells[i]
-        cell.text = h
-        for p in cell.paragraphs:
-            for run in p.runs:
-                run.bold = True
-                run.font.size = Pt(9)
-                run.font.color.rgb = RGBColor(255, 255, 255)
-        from docx.oxml.ns import qn
+        cell.text = ''
+        p = cell.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        run = p.add_run(h)
+        run.bold = True
+        run.font.size = Pt(9)
+        run.font.color.rgb = RGBColor(255, 255, 255)
+        run.font.name = 'Calibri'
         shading = cell._element.get_or_add_tcPr()
-        shading_elm = shading.makeelement(qn('w:shd'), {qn('w:fill'): '333333', qn('w:val'): 'clear'})
+        shading_elm = shading.makeelement(qn('w:shd'), {qn('w:fill'): '1e293b', qn('w:val'): 'clear'})
         shading.append(shading_elm)
+
     total_global = 0
-    for d in detalles:
+    for idx, d in enumerate(detalles):
         ap = autopartes.get(d.autoparte_id)
         if ap:
             total = ap.precio * d.cantidad
             total_global += total
             row = table.add_row().cells
             row[0].text = ap.nombre
-            row[1].text = f"${ap.precio:,.2f}"
-            row[2].text = f"x{d.cantidad}"
-            row[3].text = f"${total:,.2f}"
-    doc.add_paragraph("")
-    doc.add_heading(f"Ingresos Totales Globales: ${total_global:,.2f}", level=2)
+            row[1].text = f'${ap.precio:,.2f}'
+            row[2].text = f'x{d.cantidad}'
+            row[3].text = f'${total:,.2f}'
+            
+            if idx % 2 == 0:
+                for cell in row:
+                    shading = cell._element.get_or_add_tcPr()
+                    shading_elm = shading.makeelement(qn('w:shd'), {qn('w:fill'): 'f8fafc', qn('w:val'): 'clear'})
+                    shading.append(shading_elm)
+            
+            for j, cell in enumerate(row):
+                for par in cell.paragraphs:
+                    for run in par.runs:
+                        run.font.size = Pt(9)
+                        run.font.name = 'Calibri'
+                        if j == 3:
+                            run.bold = True
+
+    widths = [Cm(7), Cm(3.5), Cm(2.5), Cm(4)]
+    for row in table.rows:
+        for idx, width in enumerate(widths):
+            row.cells[idx].width = width
+
+    # Total
+    doc.add_paragraph('')
+    p_info = doc.add_paragraph()
+    run = p_info.add_run(f'Operaciones registradas: {len(detalles)} movimientos')
+    run.font.size = Pt(10)
+    run.font.color.rgb = RGBColor(0x64, 0x74, 0x8b)
+
+    p_total = doc.add_paragraph()
+    run = p_total.add_run('Ingresos Totales Globales: ')
+    run.font.size = Pt(14)
+    run.font.color.rgb = RGBColor(0x33, 0x41, 0x55)
+    run = p_total.add_run(f'${total_global:,.2f}')
+    run.font.size = Pt(18)
+    run.bold = True
+    run.font.color.rgb = RGBColor(0x10, 0xb9, 0x81)
+
     import tempfile, os
-    file_path = os.path.join(tempfile.gettempdir(), "reporte_ventas.docx")
+    file_path = os.path.join(tempfile.gettempdir(), 'reporte_ventas.docx')
     doc.save(file_path)
-    return FileResponse(file_path, filename="reporte_ventas.docx")
+    return FileResponse(file_path, filename='reporte_ventas.docx')
 
 
 # ventas pdf

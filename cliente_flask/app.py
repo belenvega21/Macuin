@@ -18,7 +18,7 @@ carritos = {}
 # 🔐 LOGIN PAGE
 @app.route("/")
 def index():
-    return redirect("/inicio")
+    return redirect("/login")
 
 @app.route("/login")
 def login():
@@ -161,9 +161,12 @@ def agregar_carrito(producto_id):
 
     productos = obtener_productos_api()
     producto = next((p for p in productos if p["id"] == producto_id), None)
+    
+    cantidad = int(request.args.get("cantidad", 1))
 
     if producto:
-        carritos[user_id].append(producto)
+        for _ in range(cantidad):
+            carritos[user_id].append(producto)
 
     if is_ajax:
         return jsonify({"success": True})
@@ -253,8 +256,14 @@ def perfil():
         
         if file and file.filename != '':
             try:
-                files = {'file': (file.filename, file.stream, file.mimetype)}
-                requests.post(f"{API_URL}/usuarios/{user_id}/upload_perfil", headers=headers, files=files)
+                file_bytes = file.read()
+                files = {'file': (file.filename, file_bytes, file.mimetype)}
+                upload_res = requests.post(f"{API_URL}/usuarios/{user_id}/upload_perfil", headers=headers, files=files)
+                if upload_res.status_code == 200:
+                    new_url = upload_res.json().get("url")
+                    if new_url and "user" in session:
+                        session["user"]["imagen_perfil"] = new_url
+                        session.modified = True
             except Exception as e:
                 print("Error uploading profile picture:", e)
 

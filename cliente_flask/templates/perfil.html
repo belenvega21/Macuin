@@ -108,6 +108,8 @@
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest pl-4 mb-2">Línea Telefónica</label>
                         <input type="text" name="telefono" value="{{ user.telefono }}" class="macuin-input w-full">
                     </div>
+                    <!-- Hidden file input for profile photo (inside form for proper multipart submission) -->
+                    <input type="file" id="fileUploadForm" name="imagen_perfil" class="hidden" accept="image/*">
                 </div>
 
                 <div class="border-t border-gray-800 pt-8 mt-4 mb-8">
@@ -195,7 +197,24 @@
 
     function submitProfileImage(input) {
         if (input.files && input.files[0]) {
-            // Se envía de golpe guardando el form entero (que ahora tiene multipart)
+            // Copy the file to the hidden input inside the form
+            const formFileInput = document.getElementById('fileUploadForm');
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(input.files[0]);
+            formFileInput.files = dataTransfer.files;
+
+            // Preview image immediately
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('avatarImg');
+                const icon = document.getElementById('avatarIcon');
+                img.src = e.target.result;
+                img.classList.remove('hidden');
+                if(icon) icon.classList.add('hidden');
+            };
+            reader.readAsDataURL(input.files[0]);
+
+            // Submit the form
             document.getElementById('perfilForm').submit();
         }
     }
@@ -223,7 +242,7 @@
                 return false;
             }
         }
-        return True;
+        return true;
     }
 </script>
 
