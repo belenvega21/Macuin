@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, send_file, session
+from flask import Flask, render_template, request, redirect, url_for, send_file, session, flash, jsonify
 from reportlab.pdfgen import canvas
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
@@ -134,12 +134,24 @@ def catalogo():
     if marca:
         filtrados = [p for p in filtrados if strip_accents(p.get("marca", "").lower()) == marca]
 
-    return render_template("catalogo.html", productos=filtrados, marcas=marcas_global)
+    # Extraer marcas únicas de los productos reales
+    marcas_reales = []
+    seen = set()
+    for p in productos:
+        m = p.get("marca", "")
+        if m and m.lower() not in seen:
+            seen.add(m.lower())
+            marcas_reales.append({"nombre": m})
+
+    return render_template("catalogo.html", productos=filtrados, marcas=marcas_reales)
 
 # ➕ AGREGAR AL CARRITO (CORRECTO)
 @app.route("/agregar/<int:producto_id>")
 def agregar_carrito(producto_id):
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
     if "user" not in session:
+        if is_ajax:
+            return jsonify({"error": "No autenticado"}), 401
         return redirect("/login")
         
     user_id = session["user"]["id"]
@@ -153,6 +165,8 @@ def agregar_carrito(producto_id):
     if producto:
         carritos[user_id].append(producto)
 
+    if is_ajax:
+        return jsonify({"success": True})
     return redirect("/carrito")
 
 # VER CARRITO
@@ -193,6 +207,7 @@ def comprar():
     carrito_items = carritos.get(user_id, [])
 
     if len(carrito_items) == 0:
+        flash("Error: Tu carrito está vacío. Agrega productos al carrito primero.", "error")
         return redirect("/catalogo")
 
     # Adaptar para el formato API (espera list of productos {id, cantidad})
@@ -213,8 +228,12 @@ def comprar():
         }, headers=headers)
         if res.status_code == 200:
             carritos[user_id] = []
+            flash("¡Compra realizada con éxito! Ve a tu perfil para revisar el seguimiento de tu pedido.", "success")
+        else:
+            flash("Error al procesar la compra en el servidor.", "error")
     except Exception as e:
         print("Error creating order:", e)
+        flash("Hubo un problema procesando tu compra.", "error")
 
     return redirect("/perfil")
 
@@ -228,20 +247,54 @@ def perfil():
     token = session.get('jwt_token')
     
     if request.method == "POST":
+        # Manejar archivo si existe
         file = request.files.get("imagen_perfil")
+        headers = {"Authorization": f"Bearer {token}"}
+        
         if file and file.filename != '':
             try:
-                headers = {"Authorization": f"Bearer {token}"}
                 files = {'file': (file.filename, file.stream, file.mimetype)}
-                res = requests.post(f"{API_URL}/usuarios/{user_id}/upload_perfil", headers=headers, files=files)
-                if res.status_code == 200:
-                    # Refresh user info
-                    user_res = requests.get(f"{API_URL}/usuarios/me", headers=headers)
-                    if user_res.status_code == 200:
-                        session["user"] = user_res.json()
-                        session.modified = True
+                requests.post(f"{API_URL}/usuarios/{user_id}/upload_perfil", headers=headers, files=files)
             except Exception as e:
                 print("Error uploading profile picture:", e)
+
+        # Manejar datos de texto
+        nombre = request.form.get("nombre")
+        telefono = request.form.get("telefono")
+        
+        try:
+            # PUT normal
+            requests.put(f"{API_URL}/usuarios/{user_id}", headers=headers, data={
+                "nombre": nombre, "email": session["user"]["email"], "telefono": telefono, "rol": session["user"].get("rol", "user")
+            })
+        except: pass
+
+        # Manejar Password
+        actual_pass = request.form.get("actual_password")
+        new_pass = request.form.get("password")
+        
+        if actual_pass and new_pass:
+            try:
+                res_pass = requests.patch(f"{API_URL}/usuarios/{user_id}/password", headers=headers, data={
+                    "password_actual": actual_pass, "nueva_password": new_pass
+                })
+                if res_pass.status_code == 200:
+                    flash("Contraseña actualizada exitosamente", "success")
+                else:
+                    flash(res_pass.json().get("detail", "Error al actualizar la contraseña"), "error")
+            except Exception as e:
+                flash("Error de conexión al cambiar contraseña", "error")
+        else:
+            flash("Perfil guardado", "success")
+
+        # Refresh user info
+        try:
+            user_res = requests.get(f"{API_URL}/usuarios/me", headers=headers)
+            if user_res.status_code == 200:
+                session["user"] = user_res.json()
+                session.modified = True
+        except: pass
+
         return redirect("/perfil")
 
     user_pedidos = []
@@ -280,138 +333,113 @@ def perfil():
                     total_gastado += p_data["precio"]
         pedidos_view.append(pedido_view)
 
+    usuario_info = {
+        "nombre": session["user"].get("nombre", ""),
+        "email": session["user"].get("email", ""),
+        "telefono": session["user"].get("telefono", ""),
+        "rol": session["user"].get("rol", "usuario")
+    }
+
     return render_template(
         "perfil.html",
         pedidos=pedidos_view,
         total_gastado=total_gastado,
-        user=session["user"]
+        user=usuario_info
     )
 
-# 🧾 GENERAR PDF
-@app.route("/recibo/<int:pedido_id>")
-def generar_recibo(pedido_id):
+# 📋 MIS PEDIDOS (vista HTML)
+@app.route("/pedidos")
+def mis_pedidos():
     if "user" not in session:
         return redirect("/login")
+
+    user_id = session["user"]["id"]
+    pedidos_lista = []
 
     try:
         headers = {"Authorization": f"Bearer {session.get('jwt_token')}"}
         res = requests.get(f"{API_URL}/pedidos/", headers=headers)
         if res.status_code == 200:
             all_pedidos = res.json()
-            user_pedidos = [p for p in all_pedidos if p["usuario_id"] == session["user"]["id"]]
-    except:
-        user_pedidos = []
+            pedidos_lista = [p for p in all_pedidos if p["usuario_id"] == user_id]
+    except Exception as e:
+        print("Error fetching orders:", e)
 
-    pedido = next((p for p in user_pedidos if p["id"] == pedido_id), None)
-    if not pedido:
-        return "Pedido no encontrado"
-
-    file_path = f"recibo_{session['user']['id']}_{pedido_id}.pdf"
-
-    # Preparar el documento Platypus
-    doc = SimpleDocTemplate(
-        file_path, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40,
-        title=f"Recibo Macuin - Pedido #{pedido_id}",
-        author="MACUIN Autopartes"
-    )
-    styles = getSampleStyleSheet()
-    elementos = []
-
-    # Encabezado (Logo simulado o Nombre de empresa + "Nota de Venta")
-    title_table_data = [
-        [Paragraph("<b>MACUIN AUTOPARTES</b>", styles["Heading1"]), Paragraph("<font size=12><b>Nota de venta</b></font>", styles["Normal"])]
-    ]
-    title_table = Table(title_table_data, colWidths=[300, 200])
-    title_table.setStyle(TableStyle([
-        ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
-        ('BACKGROUND', (1, 0), (1, 0), colors.HexColor("#f0f0f0")),
-        ('PADDING', (1, 0), (1, 0), 10),
-    ]))
-    elementos.append(title_table)
-    elementos.append(Spacer(1, 20))
-
-    # Información general (Cliente, Ticket y Fecha)
-    fecha_texto = pedido.get('fecha', 'N/A')
-    if 'T' in fecha_texto:
-        fecha_texto = fecha_texto.replace('T', ' ')[:16]
-
-    info_data = [
-        [Paragraph("<b>MACUIN</b><br/>Av. Paseo de la República<br/>Querétaro, México<br/>ventas@macuin.com.mx<br/>+524422216728", styles["Normal"]), 
-         Paragraph(f"<b>Ticket:</b> VENTA-{pedido_id}<br/><b>Fecha:</b> {fecha_texto}<br/><b>Cliente:</b> {session['user']['nombre']}<br/><b>Status:</b> {pedido.get('estado', 'recibido')}", styles["Normal"])]
-    ]
-    info_table = Table(info_data, colWidths=[250, 250])
-    info_table.setStyle(TableStyle([
-        ('VALIGN', (0,0), (-1,-1), 'TOP'),
-        ('LINEAFTER', (0,0), (0,0), 1, colors.HexColor("#e0e0e0")),
-        ('PADDING', (0,0), (-1,-1), 10),
-    ]))
-    elementos.append(info_table)
-    elementos.append(Spacer(1, 20))
-
-    # Tabla de productos
-    tabla_productos_data = [["Producto", "Cantidad", "Precio Unitario", "Subtotal"]]
-    total = 0
-    
+    # Calcular total por pedido
     productos = obtener_productos_api()
     producto_map = {p["id"]: p for p in productos}
 
-    for det in pedido["productos"]:
-        p_data = producto_map.get(det["autoparte_id"] if "autoparte_id" in det else det["id"])
+    pedidos_view = []
+    for pedido in pedidos_lista:
+        total = 0
+        for det in pedido.get("productos", []):
+            p_data = producto_map.get(det.get("autoparte_id", det.get("id")))
+            if p_data:
+                total += p_data["precio"] * det["cantidad"]
+        pedidos_view.append({
+            "id": pedido["id"],
+            "estado": pedido.get("estado", "en_proceso"),
+            "fecha_pedido": pedido.get("fecha", "N/A"),
+            "total": total
+        })
+
+    return render_template("pedidos.html", pedidos=pedidos_view)
+
+# 🧾 VER RECIBO HTML
+@app.route("/recibo/<int:pedido_id>")
+def generar_recibo(pedido_id):
+    if "user" not in session:
+        return redirect("/login")
+
+    pedido_data = None
+    try:
+        headers = {"Authorization": f"Bearer {session.get('jwt_token')}"}
+        res = requests.get(f"{API_URL}/pedidos/", headers=headers)
+        if res.status_code == 200:
+            all_pedidos = res.json()
+            user_pedidos = [p for p in all_pedidos if p["usuario_id"] == session["user"]["id"]]
+            pedido_data = next((p for p in user_pedidos if p["id"] == pedido_id), None)
+            
+            if not pedido_data:
+                return "Acceso denegado o pedido inexistente."
+    except:
+        return "Error de validación de seguridad."
+
+    # Obtener productos para relacionarlos
+    productos = obtener_productos_api()
+    producto_map = {p["id"]: p for p in productos}
+    
+    total = 0
+    detalles = []
+    
+    for item in pedido_data.get("productos", []):
+        ap_id = item.get("autoparte_id", item.get("id"))
+        p_data = producto_map.get(ap_id)
         if p_data:
-            qty = det["cantidad"]
+            qty = item["cantidad"]
             precio = p_data["precio"]
-            subtotal = precio * qty
-            tabla_productos_data.append([
-                Paragraph(f"<font size=10>{p_data['nombre']}</font><br/><font size=8 color=gray>{p_data['marca']} | ID: {p_data['id']}</font>", styles["Normal"]),
-                f"{qty} piezas",
-                f"${precio:,.2f}",
-                f"${subtotal:,.2f}"
-            ])
-            total += subtotal
+            sub = precio * qty
+            total += sub
+            detalles.append({
+                "cantidad": qty,
+                "precio_unitario": precio,
+                "subtotal": sub,
+                "autoparte": {"nombre": p_data["nombre"]}
+            })
 
-    tabla_prod = Table(tabla_productos_data, colWidths=[250, 70, 90, 90])
-    tabla_prod.setStyle(TableStyle([
-        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-        ('LINEBELOW', (0,0), (-1,0), 1, colors.black),
-        ('ALIGN', (1,0), (-1,-1), 'CENTER'),
-        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 10),
-        ('TOPPADDING', (0,0), (-1,-1), 10),
-        ('LINEBELOW', (0,1), (-1,-2), 0.5, colors.HexColor("#e0e0e0")),
-    ]))
-    elementos.append(tabla_prod)
-    elementos.append(Spacer(1, 20))
-
-    # Cuadro de totales
-    iva = total * 0.16
-    total_con_iva = total + iva
-    totales_data = [
-        ["Subtotal", f"${total:,.2f}"],
-        ["IVA 16%", f"${iva:,.2f}"],
-        [Paragraph("<b>Total a Pagar</b>", styles["Normal"]), Paragraph(f"<b>${total_con_iva:,.2f}</b>", styles["Normal"])]
-    ]
-    totales_table = Table(totales_data, colWidths=[100, 100])
-    totales_table.setStyle(TableStyle([
-        ('ALIGN', (0,0), (-1,-1), 'RIGHT'),
-        ('LINEABOVE', (0,2), (1,2), 1, colors.black),
-        ('PADDING', (0,0), (-1,-1), 5),
-    ]))
+    fecha_texto = pedido_data.get('fecha', 'N/A')
     
-    # Grid de Totales a la derecha
-    layout_totales = Table([["", totales_table]], colWidths=[300, 200])
-    elementos.append(layout_totales)
-    
-    elementos.append(Spacer(1, 30))
-    elementos.append(Paragraph("<font size=10 color=gray>Gracias por tu compra — MACUIN Autopartes.</font>", styles["Normal"]))
+    pedido_obj = {
+        "id": pedido_data["id"],
+        "usuario": {
+            "nombre": session["user"]["nombre"],
+            "email": session["user"]["email"]
+        },
+        "fecha_pedido": fecha_texto,
+        "total": total
+    }
 
-    doc.build(elementos)
-
-    # Evitar cache de navegador modificando el nombre de descarga
-    import time
-    timestamp = int(time.time())
-    nombre_descarga = f"Recibo_Macuin_Pedido_{pedido_id}_{timestamp}.pdf"
-
-    return send_file(file_path, as_attachment=False, download_name=nombre_descarga)
+    return render_template("recibo.html", pedido=pedido_obj, detalles=detalles)
 
 # ❌ CANCELAR PEDIDO
 @app.route("/cancelar/<int:pedido_id>")

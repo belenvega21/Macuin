@@ -1,160 +1,170 @@
 <!DOCTYPE html>
 <html lang="es" class="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cesta de Compra - MACUIN</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<title>Carrito | MACUIN</title>
-
-<style>
-body {
-    background: #0b0b0b;
-    color: white;
-    font-family: 'Inter', sans-serif;
-}
-</style>
+    <style>
+        body { background-color: #080808; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .glass-nav {
+            background: rgba(8, 8, 8, 0.65); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .pulpos-card {
+            background-color: #111111; border-radius: 2rem; border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .pulpos-item {
+            background-color: #0e0e0e; border-radius: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: all 0.3s ease;
+        }
+        .pulpos-item:hover { border-color: rgba(255,255,255,0.1); transform: translateY(-2px); }
+    </style>
 </head>
+<body class="flex flex-col min-h-screen relative selection:bg-yellow-400 selection:text-black">
 
-<body>
+<div class="fixed -z-10 top-[-10%] right-[-5%] w-[600px] h-[600px] bg-yellow-400/5 rounded-full blur-[150px] pointer-events-none"></div>
 
-<nav class="fixed top-0 w-full z-50 bg-[#0e0e0e]/80 backdrop-blur border-b border-gray-800">
-    <div class="flex justify-between items-center px-8 py-4">
-  
-      <div class="flex items-center gap-3">
-        <img src="/static/img/nuevologo.png" class="h-10">
-        <span class="font-bold text-lg">MACUIN</span>
-      </div>
-  
-      <div class="hidden md:flex gap-8 text-sm">
-        <a href="/inicio" class="text-yellow-400">Inicio</a>
-        <a href="/catalogo" class="hover:text-yellow-400">Catálogo</a>
-        <a href="/carrito" class="hover:text-yellow-400">Carrito</a>
-        <a href="/perfil" class="hover:text-yellow-400">Perfil</a>
-  
-      </div>
-  
-      <a href="/login" class="bg-yellow-400 text-black px-4 py-2 rounded-md font-bold hover:bg-yellow-500">
-        Cerrar sesión
-      </a>
-  
+{% set active_page = 'carrito' %}
+{% set page_title = 'Tu Cesta de Compra' %}
+{% include '_navbar.html' %}
+
+<main class="flex-1 pt-36 px-6 lg:px-10 pb-16 max-w-7xl mx-auto w-full">
+
+    <div class="flex items-center gap-4 mb-10">
+        <div class="w-16 h-16 bg-yellow-400/10 rounded-3xl flex items-center justify-center">
+            <span class="material-symbols-rounded text-[32px] text-yellow-400">shopping_bag</span>
+        </div>
+        <div>
+            <h2 class="text-4xl font-black tracking-tight mb-1">Tu Cesta</h2>
+            <p class="text-gray-400 font-medium">Revisa y confirma tu pedido de refacciones.</p>
+        </div>
     </div>
-  </nav>
-  
-  <main class="pt-24">
 
-<!-- CONTENIDO -->
-<main class="max-w-7xl mx-auto px-12 lg:px-16 pt-32 pb-16">
+    {% if carrito and carrito|length > 0 %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- ITEM LIST -->
+        <div class="lg:col-span-2 space-y-4">
+            {% for item in carrito %}
+            <div class="pulpos-item p-4 sm:p-6 flex flex-col sm:flex-row items-center gap-6">
+                <!-- Imagen o Icono -->
+                <div class="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {% if item.imagen %}
+                    <img src="{{ item.imagen }}" class="w-full h-full object-contain p-1" alt="{{ item.nombre }}">
+                    {% else %}
+                    <span class="material-symbols-rounded text-gray-500 text-[32px]">extension</span>
+                    {% endif %}
+                </div>
+                
+                <div class="flex-1 text-center sm:text-left">
+                    <h3 class="text-lg font-bold text-white mb-1">{{ item.nombre }}</h3>
+                    <p class="text-sm text-gray-500">{{ item.marca }} · ID: #{{ item.id }}</p>
+                </div>
 
-<div class="grid lg:grid-cols-3 gap-12">
+                <div class="flex items-center gap-4">
+                    <div class="text-right w-28">
+                        <p class="text-[1.1rem] font-bold text-white">${{ "{:,.2f}".format(item.precio) }}</p>
+                    </div>
 
-<div class="lg:col-span-2">
+                    <button type="button" onclick="confirmarEliminacion('/carrito/eliminar/{{ loop.index0 }}', 'Quitar Artículo', 'Esta pieza será removida de tu carrito actual.')" class="w-10 h-10 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white transition ml-2 cursor-pointer relative z-10" title="Eliminar artículo">
+                        <span class="material-symbols-rounded text-[20px]">delete_sweep</span>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
 
-<h2 class="text-5xl font-extrabold mb-10 tracking-tight">
-    Tu carrito
-</h2>
+        <!-- SUMMARY CARD -->
+        <div>
+            <div class="pulpos-card p-8 sticky top-32">
+                <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                    <span class="material-symbols-rounded text-yellow-400">receipt_long</span> Resumen de Orden
+                </h3>
 
-<div id="carrito-container" class="space-y-6"></div>
+                <div class="space-y-4 mb-6 border-b border-gray-800 pb-6">
+                    <div class="flex justify-between text-gray-400 font-medium">
+                        <span>Artículos ({{ carrito|length }})</span>
+                        <span>${{ "{:,.2f}".format(total) }}</span>
+                    </div>
+                    <div class="flex justify-between text-gray-400 font-medium">
+                        <span>Envío Asegurado</span>
+                        <span class="text-emerald-400">Gratis</span>
+                    </div>
+                </div>
 
-    let subtotal = 0;
-</script>
+                <div class="flex justify-between items-end mb-8">
+                    <span class="text-gray-400 font-bold">Total a pagar</span>
+                    <span class="text-[2.2rem] font-black leading-none text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200">
+                        ${{ "{:,.2f}".format(total) }}
+                    </span>
+                </div>
 
-{% if not carrito %}
-<div class="flex flex-col items-center justify-center text-gray-400 text-lg py-12">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 mb-4 text-gray-600">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.198 1.318M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm3.675 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75z" />
-    </svg>
-    Tu carrito está vacío
-</div>
-{% else %}
-    {% for producto in carrito %}
-    <div class="flex items-center justify-between bg-[#111] border border-white/10 rounded-xl p-5 hover:border-yellow-400 transition">
-        <div class="flex items-center gap-5">
-            <img src="{{ producto.imagen }}" 
-                 class="w-28 h-28 object-contain bg-white rounded-lg p-2">
-            <div>
-                <h3 class="text-xl font-bold">{{ producto.nombre }}</h3>
-                <p class="text-sm text-gray-500 mb-1">SKU: <span class="text-gray-300">{{ producto.sku if producto.sku else 'N/A' }}</span></p>
-                <p class="text-gray-400">${{ "{:,.2f}".format(producto.precio) }}</p>
+                <a href="/comprar" class="w-full bg-yellow-400 text-black font-black py-4 rounded-full text-lg shadow-[0_0_20px_rgba(255,193,7,0.3)] hover:shadow-[0_0_30px_rgba(255,193,7,0.5)] hover:-translate-y-1 transition duration-300 flex items-center justify-center gap-2">
+                    Proceder al Pago <span class="material-symbols-rounded">credit_score</span>
+                </a>
+
+                <button type="button" onclick="confirmarEliminacion('/carrito/vaciar', 'Vaciar Cesta Completa', 'Todos los artículos serán removidos en su totalidad. Tendrás que explorar el catálogo para agregarlos nuevamente.')" class="w-full mt-4 bg-white/5 text-gray-400 font-bold py-3 rounded-full text-sm hover:bg-red-500/10 hover:text-red-400 transition flex items-center justify-center gap-2 border border-white/5 cursor-pointer">
+                    <span class="material-symbols-rounded text-[18px]">remove_shopping_cart</span> Vaciar Cesta
+                </button>
+
+                <p class="text-center text-xs text-gray-500 mt-4 font-medium flex items-center justify-center gap-1">
+                    <span class="material-symbols-rounded text-[14px]">lock</span> Transacción encriptada 256-bit
+                </p>
             </div>
         </div>
-        <a href="/carrito/eliminar/{{ loop.index0 }}"
-            class="text-red-400 hover:text-red-600 font-semibold">
-            Eliminar
+
+    </div>
+    {% else %}
+    <div class="text-center py-24 bg-white/5 rounded-[2.5rem] border border-white/5 backdrop-blur-xl">
+        <span class="material-symbols-rounded text-gray-600 text-[80px] mb-4">remove_shopping_cart</span>
+        <h3 class="text-2xl font-bold text-gray-300 mb-2">Tu cesta está vacía.</h3>
+        <p class="text-gray-500 font-medium max-w-md mx-auto mb-8">Agrega autopartes del catálogo para continuar con el proceso de cotización y pago.</p>
+        <a href="/catalogo" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold py-3.5 px-8 rounded-full transition border border-white/10">
+            <span class="material-symbols-rounded">storefront</span> Visitar Catálogo
         </a>
     </div>
-    {% endfor %}
-{% endif %}
-</div>
+    {% endif %}
 
-<div class="bg-gradient-to-br from-[#111] to-[#0a0a0a] 
-            border border-white/10 
-            rounded-3xl 
-            p-8 
-            shadow-[0_0_40px_rgba(255,204,0,0.08)] 
-            h-fit 
-            relative overflow-hidden">
-
-    <!-- Glow -->
-    <div class="absolute -top-20 -right-20 w-60 h-60 bg-yellow-400 opacity-10 blur-3xl"></div>
-
-    <h3 class="text-2xl font-bold mb-8">Resumen</h3>
-
-    <div class="space-y-4 text-gray-400 text-sm">
-
-        <div class="flex justify-between">
-            <span>Subtotal</span>
-            <span id="subtotal">${{ "{:,.2f}".format(total) }}</span>
-        </div>
-
-        <div class="flex justify-between">
-            <span>IVA (16%)</span>
-            <span id="iva">${{ "{:,.2f}".format(total * 0.16) }}</span>
-        </div>
-
-        <div class="flex justify-between">
-            <span>Envío</span>
-            <span class="text-green-400 font-semibold">Gratis</span>
-        </div>
-
-    </div>
-
-    <div class="border-t border-white/10 my-6"></div>
-
-    <div class="flex justify-between items-end">
-        <span class="text-lg text-gray-400">Total</span>
-        <span id="total" class="text-4xl font-extrabold text-yellow-400">
-            ${{ "{:,.2f}".format(total * 1.16) }}
-        </span>
-    </div>
-
-    <div class="mt-8 space-y-4">
-
-        {% if carrito %}
-        <a href="/comprar" class="block text-center w-full bg-yellow-400 text-black py-4 rounded-xl font-bold text-lg 
-                       hover:scale-[1.03] transition-all shadow-lg">
-            Finalizar compra
-        </a>
-
-        <a href="/carrito/vaciar" 
-                class="block text-center w-full bg-red-500 py-3 rounded-xl font-bold text-white
-                       hover:bg-red-600 transition-all">
-            Vaciar carrito
-        </a>
-        {% endif %}
-
-    </div>
-
-</div>
-
-</div>
 </main>
 
-<!-- FOOTER -->
-<footer class="bg-[#0e0e0e] border-t border-gray-800 text-center py-6 text-gray-500 text-sm">
-    © 2026 MACUIN - Autopartes
+<footer class="border-t border-white/5 bg-[#080808]/80 backdrop-blur-xl py-10 text-center mt-auto relative z-10">
+    <div class="flex items-center justify-center gap-3 mb-4">
+        <img src="/static/img/nuevologo.png" class="h-6 w-auto drop-shadow-md" alt="MACUIN">
+        <span class="font-extrabold tracking-widest text-gray-300 text-sm">MACUIN.STORE</span>
+    </div>
+    <p class="font-medium text-sm text-gray-500">© 2026 Todos los derechos reservados</p>
 </footer>
+
+<script>
+    function confirmarEliminacion(url, titulo, subtexto) {
+        Swal.fire({
+            html: `
+                <div class="text-center">
+                    <div class="w-20 h-20 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mx-auto mb-6 border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+                        <span class="material-symbols-rounded text-4xl">delete_forever</span>
+                    </div>
+                    <h3 class="text-2xl font-black text-white mb-2">${titulo}</h3>
+                    <p class="text-gray-400 text-sm mb-8 leading-relaxed">${subtexto}</p>
+                </div>
+            `,
+            background: '#111', color: '#fff', width: 420,
+            customClass: { popup: 'rounded-[2rem] border border-white/10 p-4 shadow-2xl' },
+            showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#374151',
+            confirmButtonText: '<span class="font-bold text-white">Sí, eliminar</span>', cancelButtonText: 'Conservar',
+            focusCancel: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    }
+</script>
 
 </body>
 </html>

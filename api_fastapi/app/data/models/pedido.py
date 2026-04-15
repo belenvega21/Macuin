@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy.orm import relationship
 from app.data.database import Base
 from datetime import datetime
 
@@ -11,3 +12,5 @@ class Pedido(Base):
     fecha = Column(DateTime, default=datetime.utcnow)
     paqueteria = Column(String(100), nullable=True)
     num_seguimiento = Column(String(100), nullable=True)
+
+    items = relationship("DetallePedido", back_populates="pedido")

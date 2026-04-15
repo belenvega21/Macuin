@@ -1,114 +1,161 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedidos | MACUIN</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
 
-{% block content %}
+    <style>
+        body { background-color: #080808; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .glass-nav { background: rgba(8,8,8,0.65); backdrop-filter: blur(24px); border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .pulpos-card { background-color: #111111; border-radius: 2rem; border: 1px solid rgba(255,255,255,0.04); box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen relative selection:bg-yellow-400 selection:text-black">
 
-<style>
-.card{
-    background:#1a1a1a;
-    border:1px solid #262626;
+<div class="fixed -z-10 top-[-10%] right-[-5%] w-[600px] h-[600px] bg-yellow-400/5 rounded-full blur-[150px] pointer-events-none"></div>
+
+{% set active_page = 'pedidos' %}
+{% set page_title = 'Mis Pedidos' %}
+{% include '_navbar.html' %}
+
+<main class="flex-1 pt-36 px-6 lg:px-10 pb-16 max-w-7xl mx-auto w-full">
+
+    <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 mb-10 w-full">
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 bg-blue-500/10 rounded-3xl flex items-center justify-center text-blue-400">
+                <span class="material-symbols-rounded text-[32px]">local_shipping</span>
+            </div>
+            <div>
+                <h2 class="text-4xl font-black tracking-tight mb-1">Tus Órdenes</h2>
+                <p class="text-gray-400 font-medium">Sigue el estado de tus compras en tiempo real.</p>
+            </div>
+        </div>
+        
+        <!-- Filter Global -->
+        <div class="bg-[#111111] border border-white/5 rounded-[2rem] p-3 flex flex-wrap items-center gap-3 w-full xl:w-auto shadow-2xl">
+            <span class="material-symbols-rounded text-gray-500 pl-3">calendar_month</span>
+            <div class="border border-white/10 rounded-xl overflow-hidden focus-within:border-yellow-400 transition bg-black/50">
+                <input type="date" id="filter-start" class="bg-transparent text-white px-4 py-2.5 text-sm focus:outline-none placeholder-gray-500 w-full md:w-auto" style="color-scheme: dark;">
+            </div>
+            <span class="text-gray-500 font-bold uppercase text-xs">a</span>
+            <div class="border border-white/10 rounded-xl overflow-hidden focus-within:border-yellow-400 transition bg-black/50">
+                <input type="date" id="filter-end" class="bg-transparent text-white px-4 py-2.5 text-sm focus:outline-none placeholder-gray-500 w-full md:w-auto" style="color-scheme: dark;">
+            </div>
+            <button onclick="applyDateFilter()" class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-6 py-2.5 rounded-xl transition flex items-center gap-2 text-sm shadow-[0_0_20px_rgba(255,193,7,0.15)] ml-auto xl:ml-0">
+                <span class="material-symbols-rounded text-[18px]">filter_alt</span> Filtrar
+            </button>
+            <button onclick="clearDateFilter()" title="Quitar Filtros" class="bg-white/5 hover:bg-white/10 text-gray-400 border border-white/5 px-3 py-2.5 rounded-xl transition flex items-center justify-center">
+                <span class="material-symbols-rounded text-[18px]">filter_alt_off</span>
+            </button>
+        </div>
+    </div>
+
+    {% if pedidos %}
+    <div class="space-y-6" id="lista-pedidos">
+        {% for pd in pedidos %}
+        <div class="pulpos-card p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 group hover:border-white/10 transition" data-date="{{ pd.fecha_pedido.split('T')[0] }}">
+            
+            <div class="flex gap-6 items-center">
+                <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center font-black text-gray-500 group-hover:text-yellow-400 group-hover:bg-yellow-400/10 transition">
+                    #{{ pd.id }}
+                </div>
+                <div>
+                    <!-- Status Badge -->
+                    {% if pd.estado == 'entregado' %}
+                        <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-bold inline-block mb-2 uppercase tracking-widest">Entregado</span>
+                    {% elif pd.estado == 'cancelado' %}
+                        <span class="bg-red-500/20 text-red-500 border border-red-500/20 px-3 py-1 rounded-full text-xs font-bold inline-block mb-2 uppercase tracking-widest">Cancelado</span>
+                    {% elif pd.estado == 'en_ruta' %}
+                        <span class="bg-blue-500/20 text-blue-400 border border-blue-500/20 px-3 py-1 rounded-full text-xs font-bold inline-block mb-2 uppercase tracking-widest">En Ruta</span>
+                    {% else %}
+                        <span class="bg-yellow-400/20 text-yellow-400 border border-yellow-400/20 px-3 py-1 rounded-full text-xs font-bold inline-block mb-2 uppercase tracking-widest">En Proceso</span>
+                    {% endif %}
+                    
+                    <h3 class="text-lg font-bold text-gray-300">{{ pd.fecha_pedido.replace('T', ' ') }}</h3>
+                    
+                    {% if pd.num_seguimiento and pd.paqueteria %}
+                    <div class="mt-2 bg-yellow-400/10 border border-yellow-400/20 rounded-lg p-2.5 inline-block">
+                        <p class="text-[10px] text-yellow-400 font-bold uppercase tracking-widest mb-0.5">Guía de Rastreo ({{ pd.paqueteria }})</p>
+                        <p class="font-mono text-gray-200 text-sm font-bold flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px]">local_shipping</span> {{ pd.num_seguimiento }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="flex md:flex-row flex-col gap-6 w-full md:w-auto items-start md:items-center">
+                <div class="text-left md:text-right">
+                    <p class="text-sm font-medium text-gray-500 uppercase tracking-widest">Inversión Final</p>
+                    <p class="text-2xl font-black text-white">${{ "{:,.2f}".format(pd.total) }}</p>
+                </div>
+                
+                <a href="/recibo/{{ pd.id }}" target="_blank" class="w-full md:w-auto bg-white/5 hover:bg-white/10 text-white border border-white/5 px-6 py-3.5 rounded-full font-bold flex items-center justify-center gap-2 transition">
+                    <span class="material-symbols-rounded text-[20px]">receipt_long</span> Ver Recibo
+                </a>
+            </div>
+            
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-24 bg-white/5 rounded-[2.5rem] border border-white/5 backdrop-blur-xl">
+        <span class="material-symbols-rounded text-gray-600 text-[80px] mb-4">history</span>
+        <h3 class="text-2xl font-bold text-gray-300 mb-2">No hay historial de compras.</h3>
+        <p class="text-gray-500 font-medium">Tus futuras adquisiciones aparecerán en esta pantalla.</p>
+    </div>
+    {% endif %}
+
+</main>
+
+<footer class="border-t border-white/5 bg-[#080808]/80 backdrop-blur-xl py-10 text-center mt-auto">
+    <p class="font-medium text-sm text-gray-500">© 2026 MACUIN. Todos los derechos reservados.</p>
+</footer>
+
+<script>
+function applyDateFilter() {
+    const startObj = document.getElementById('filter-start');
+    const endObj = document.getElementById('filter-end');
+    const startVal = startObj.value;
+    const endVal = endObj.value;
+    
+    // UI Feedback for applied filters
+    startObj.parentElement.classList.toggle('border-yellow-400/50', !!startVal);
+    startObj.parentElement.classList.toggle('border-white/10', !startVal);
+    
+    endObj.parentElement.classList.toggle('border-yellow-400/50', !!endVal);
+    endObj.parentElement.classList.toggle('border-white/10', !endVal);
+
+    let itemsVisible = 0;
+    const cards = document.querySelectorAll('.pulpos-card');
+    cards.forEach(card => {
+        const orderDate = card.getAttribute('data-date');
+        let show = true;
+        if (startVal && orderDate < startVal) show = false;
+        if (endVal && orderDate > endVal) show = false;
+        
+        if(show) {
+            card.style.display = 'flex';
+            itemsVisible++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
 }
 
-.card:hover{
-    box-shadow:0 0 20px rgba(255,215,9,0.2);
+function clearDateFilter() {
+    document.getElementById('filter-start').value = '';
+    document.getElementById('filter-end').value = '';
+    
+    document.getElementById('filter-start').parentElement.classList.replace('border-yellow-400/50', 'border-white/10');
+    document.getElementById('filter-end').parentElement.classList.replace('border-yellow-400/50', 'border-white/10');
+    
+    const cards = document.querySelectorAll('.pulpos-card');
+    cards.forEach(card => card.style.display = 'flex');
 }
-</style>
-
-<h1 class="text-4xl font-bold mb-8">Historial de pedidos</h1>
-
-<div class="grid lg:grid-cols-3 gap-10">
-
-<div class="space-y-6">
-
-    <div class="card p-6 rounded-lg">
-        <h3 class="font-bold mb-4">Filtrar</h3>
-
-        <p class="text-sm text-gray-400 mb-2">Estado</p>
-
-        <div class="space-y-2 text-sm">
-            <label class="flex gap-2">
-                <input type="checkbox"> En camino
-            </label>
-            <label class="flex gap-2">
-                <input type="checkbox"> Entregado
-            </label>
-            <label class="flex gap-2">
-                <input type="checkbox"> Cancelado
-            </label>
-        </div>
-    </div>
-
-</div>
-
-<div class="lg:col-span-2 space-y-4">
-
-    <!-- PEDIDO -->
-    <div class="card p-6 rounded-lg flex justify-between items-center">
-
-        <div>
-            <p class="text-sm text-gray-400">PEDIDO #12345</p>
-            <p class="text-xs text-gray-500">25/01/2026</p>
-        </div>
-
-        <span class="bg-blue-900 text-blue-400 text-xs px-3 py-1 rounded">
-            En camino
-        </span>
-
-        <p class="text-lg font-bold text-[#ffd709]">
-            $3,712
-        </p>
-
-        <button class="bg-[#20201f] px-4 py-2 rounded hover:bg-[#ffd709] hover:text-black">
-            Ver
-        </button>
-
-    </div>
-
-    <!-- ENTREGADO -->
-    <div class="card p-6 rounded-lg flex justify-between items-center">
-
-        <div>
-            <p class="text-sm text-gray-400">PEDIDO #11892</p>
-            <p class="text-xs text-gray-500">10/01/2026</p>
-        </div>
-
-        <span class="bg-green-900 text-green-400 text-xs px-3 py-1 rounded">
-            Entregado
-        </span>
-
-        <p class="text-lg font-bold text-[#ffd709]">
-            $1,250
-        </p>
-
-        <button class="bg-[#20201f] px-4 py-2 rounded hover:bg-[#ffd709] hover:text-black">
-            Ver
-        </button>
-
-    </div>
-
-    <!-- CANCELADO -->
-    <div class="card p-6 rounded-lg flex justify-between items-center opacity-60">
-
-        <div>
-            <p class="text-sm text-gray-400">PEDIDO #10550</p>
-            <p class="text-xs text-gray-500">01/01/2026</p>
-        </div>
-
-        <span class="bg-red-900 text-red-400 text-xs px-3 py-1 rounded">
-            Cancelado
-        </span>
-
-        <p class="text-lg font-bold text-gray-500 line-through">
-            $850
-        </p>
-
-        <button class="bg-[#20201f] px-4 py-2 rounded">
-            Ver
-        </button>
-
-    </div>
-
-</div>
-
-</div>
-
-{% endblock %}
+</script>
+</body>
+</html>

@@ -1,185 +1,143 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <title>Login - MACUIN</title>
-  <link rel="stylesheet" href="/static/css/auth.css">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - MACUIN</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body { background-color: #080808; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .pulpos-card {
+            background-color: #111111;
+            border-radius: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+        }
+        .macuin-input {
+            background-color: #0e0e0e;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 1.5rem;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .macuin-input:focus { border-color: #facc15; box-shadow: 0 0 0 2px rgba(250,204,21,0.2); outline: none; }
+    </style>
 </head>
+<body class="flex flex-col min-h-screen relative items-center justify-center p-6 selection:bg-yellow-400 selection:text-black">
 
-<body>
+<div class="fixed -z-10 top-[-20%] left-[-10%] w-[600px] h-[600px] bg-yellow-400/10 rounded-full blur-[150px] pointer-events-none"></div>
 
-<div class="container">
-
-  <!-- IZQUIERDA -->
-  <div class="left">
-    <div class="overlay">
-
-      <div class="logo-container">
-        <img src="/static/img/nuevologo.png" alt="MACUIN Logo">
-      </div>
-
-      <h4>MACUIN</h4>
-      <p class="subtitle">INGENIERÍA DE PRECISIÓN INDUSTRIAL</p>
-
-      <h1>
-        SOLUCIONES <br>
-        <span>AUTOPARTES</span><br>
-        AVANZADAS.
-      </h1>
-
-      <p class="desc">
-        Plataforma inteligente para la gestión de autopartes,
-        control de inventario y optimización de procesos.
-      </p>
-
+<a href="/inicio" class="absolute top-8 left-8 flex items-center gap-2 text-gray-400 hover:text-white transition font-bold group">
+    <div class="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center group-hover:bg-white/10 transition">
+        <span class="material-symbols-rounded">arrow_back</span>
     </div>
-  </div>
+    Volver al Inicio
+</a>
 
-  <!-- DERECHA -->
-  <div class="right">
-    <div class="card">
-
-      <h2>Iniciar sesión</h2>
-      <p class="small">Ingresa tus credenciales para continuar</p>
-
-      <!-- ERROR GENERAL -->
-      <div id="error-box" class="error-box" style="display:none;">
-        <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle; margin-right:6px;">error</span>
-        Correo o contraseña incorrectos
-      </div>
-
-      <!-- FORM -->
-      <form action="/login" method="POST" novalidate onsubmit="return validarLogin()">
-
-        <!-- CORREO -->
-        <label>
-          <span class="material-symbols-outlined label-icon">mail</span>
-          Correo
-        </label>
-        <div class="input-icon">
-          <span class="material-symbols-outlined input-left-icon">alternate_email</span>
-          <input type="email" name="email" id="email" placeholder="ejemplo@empresa.com" class="has-left-icon">
-        </div>
-        <div class="field-error" id="error-email">El correo es obligatorio y debe contener @.</div>
-
-        <!-- CONTRASEÑA -->
-        <label>
-          <span class="material-symbols-outlined label-icon">lock</span>
-          Contraseña
-        </label>
-        <div class="input-icon">
-          <span class="material-symbols-outlined input-left-icon">key</span>
-          <input type="password" name="password" id="password" placeholder="••••••••" class="has-left-icon">
-          <button type="button" class="eye-btn" onclick="togglePassword('password', 'eye-icon')">
-            <span id="eye-icon" class="material-symbols-outlined">visibility_off</span>
-          </button>
-        </div>
-        <div class="field-error" id="error-password">La contraseña es obligatoria.</div>
-
-        <!-- OPCIONES -->
-        <div class="options">
-          <label class="remember-label">
-            <input type="checkbox" id="remember-me" class="custom-checkbox">
-            <span class="checkmark"></span>
-            Recordarme
-          </label>
-
-          <a href="#">¿Olvidaste tu contraseña?</a>
-        </div>
-
-        <button type="submit" class="btn-submit">
-          <span class="material-symbols-outlined" style="font-size:18px; vertical-align:middle; margin-right:6px;">login</span>
-          INGRESAR
-        </button>
-
-      </form>
-
-      <p class="extra">
-        ¿No tienes cuenta?
-        <a href="/register">Crear cuenta</a>
-      </p>
-
+<div class="w-full max-w-md">
+    <div class="text-center mb-10">
+        <a href="/inicio" class="inline-block mb-6">
+            <img src="/static/img/nuevologo.png" class="h-16 w-auto mx-auto drop-shadow-[0_0_20px_rgba(255,193,7,0.3)] hover:scale-105 transition" alt="MACUIN">
+        </a>
+        <h1 class="text-4xl font-black tracking-tight mb-2">Bienvenido a <br>MACUIN.</h1>
+        <p class="text-gray-400 font-medium">Accede a tu cuenta para continuar</p>
     </div>
-  </div>
 
+    <div class="pulpos-card p-10 relative overflow-hidden">
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-yellow-400/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <form id="loginForm" method="POST" action="/login" onsubmit="return validarCampos(event)">
+            {% if error %}
+            <div id="server-error" data-msg="{{ error }}" class="hidden"></div>
+            {% endif %}
+            
+            <div class="mb-6 relative">
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest pl-4 mb-2">Correo Electrónico</label>
+                <div class="relative">
+                    <span class="material-symbols-rounded absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">alternate_email</span>
+                    <input type="email" id="email" name="email" placeholder="usuario@correo.com" class="macuin-input w-full pl-12 pr-4 py-4 font-medium placeholder-gray-600">
+                </div>
+            </div>
+
+            <div class="mb-8 relative">
+                <div class="flex justify-between items-center pl-4 mb-2">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest">Contraseña</label>
+                    <a href="#" class="text-xs font-bold text-yellow-400 hover:text-yellow-300">¿Olvidaste tu clave?</a>
+                </div>
+                <div class="relative group">
+                    <span class="material-symbols-rounded absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">key</span>
+                    <input type="password" id="password" name="password" placeholder="••••••••" class="macuin-input w-full pl-12 pr-12 py-4 font-medium placeholder-gray-600">
+                    <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition" onclick="togglePwd()">
+                        <span id="eye-icon" class="material-symbols-rounded text-[20px]">visibility_off</span>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" id="btnSubmit" class="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-black py-4 rounded-full text-lg shadow-[0_0_20px_rgba(255,193,7,0.3)] hover:shadow-[0_0_30px_rgba(255,193,7,0.5)] hover:-translate-y-1 transition duration-300 flex items-center justify-center gap-2">
+                Iniciar Sesión <span class="material-symbols-rounded">arrow_forward</span>
+            </button>
+        </form>
+    </div>
+
+    <p class="text-center text-gray-400 font-medium mt-10">
+        ¿No tienes cuenta? <a href="/register" class="text-white hover:text-yellow-400 font-bold transition border-b-2 border-transparent hover:border-yellow-400 pb-0.5">Regístrate aquí</a>
+    </p>
 </div>
 
-<!-- SCRIPTS -->
 <script>
-// Mostrar error si la API devolvió error
-const params = new URLSearchParams(window.location.search);
-if (params.get("error")) {
-  document.getElementById("error-box").style.display = "flex";
-}
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'bottom-end',
+        showConfirmButton: false,
+        timer: 3000,
+        background: '#111',
+        color: '#fff',
+        customClass: { popup: 'rounded-2xl border border-gray-800' }
+    });
 
-// Toggle password visibility (ZeroWaste style)
-function togglePassword(inputId, iconId) {
-  const passwordInput = document.getElementById(inputId);
-  const eyeIcon = document.getElementById(iconId);
-  if (passwordInput.type === 'password') {
-    passwordInput.type = 'text';
-    eyeIcon.textContent = 'visibility';
-  } else {
-    passwordInput.type = 'password';
-    eyeIcon.textContent = 'visibility_off';
-  }
-}
-
-// Recordarme: cargar email guardado
-window.addEventListener('DOMContentLoaded', () => {
-  const savedEmail = localStorage.getItem('macuin_email');
-  if (savedEmail) {
-    document.getElementById('email').value = savedEmail;
-    document.getElementById('remember-me').checked = true;
-  }
-});
-
-// Validación ZeroWaste style
-function validarLogin() {
-  let valido = true;
-
-  const email = document.getElementById("email");
-  const password = document.getElementById("password");
-  const errorEmail = document.getElementById("error-email");
-  const errorPassword = document.getElementById("error-password");
-
-  // Reset
-  email.classList.remove("input-error");
-  password.classList.remove("input-error");
-  errorEmail.style.display = "none";
-  errorPassword.style.display = "none";
-
-  // Email
-  if (!email.value || !email.value.includes("@")) {
-    email.classList.add("input-error");
-    errorEmail.style.display = "block";
-    valido = false;
-  }
-
-  // Password
-  if (!password.value || password.value.length < 4) {
-    password.classList.add("input-error");
-    errorPassword.textContent = password.value.length === 0 
-      ? "La contraseña es obligatoria." 
-      : "La contraseña debe tener al menos 4 caracteres.";
-    errorPassword.style.display = "block";
-    valido = false;
-  }
-
-  // Recordarme: guardar/eliminar email
-  if (valido) {
-    const rememberMe = document.getElementById('remember-me');
-    if (rememberMe.checked) {
-      localStorage.setItem('macuin_email', email.value);
-    } else {
-      localStorage.removeItem('macuin_email');
+    const svErr = document.getElementById('server-error');
+    if(svErr) {
+        Toast.fire({ icon: 'error', iconColor: '#ef4444', title: 'Acceso Denegado', text: svErr.dataset.msg });
     }
-  }
 
-  return valido;
-}
+    function togglePwd() {
+        const inp = document.getElementById('password');
+        const ico = document.getElementById('eye-icon');
+        if(inp.type === 'password'){ inp.type='text'; ico.textContent='visibility'; }
+        else { inp.type='password'; ico.textContent='visibility_off'; }
+    }
+
+    function validarCampos(e) {
+        e.preventDefault();
+        const em = document.getElementById('email');
+        const pw = document.getElementById('password');
+        
+        em.style.borderColor = 'rgba(255,255,255,0.05)';
+        pw.style.borderColor = 'rgba(255,255,255,0.05)';
+
+        if(!em.value.trim() || !em.value.includes('@')) {
+            em.style.borderColor = '#ef4444';
+            Toast.fire({ icon: 'warning', title: 'Revisa tu correo' });
+            return;
+        }
+        if(!pw.value.trim()) {
+            pw.style.borderColor = '#ef4444';
+            Toast.fire({ icon: 'warning', title: 'La contraseña es obligatoria' });
+            return;
+        }
+
+        const btn = document.getElementById('btnSubmit');
+        btn.innerHTML = '<span class="material-symbols-rounded animate-spin">refresh</span> Autenticando...';
+        btn.disabled = true;
+        btn.classList.add('opacity-80', 'cursor-wait');
+
+        document.getElementById('loginForm').submit();
+    }
 </script>
 
 </body>

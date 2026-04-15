@@ -1,26 +1,49 @@
-FROM php:8.4-apache
+# — Stage 1: crear proyecto Laravel con composer
+FROM composer:2.7 AS builder
 
-WORKDIR /var/www/html
-RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
-    libzip-dev \
-    && docker-php-ext-install pdo pdo_mysql zip
+WORKDIR /app
+ENV COMPOSER_MEMORY_LIMIT=-1
+RUN composer create-project laravel/laravel . --prefer-dist --no-interaction
 
+# Copiar archivos personalizados encima del scaffold de Laravel
+COPY routes/ ./routes/
+COPY app/ ./app/
+COPY resources/views/ ./resources/views/
+COPY public/ ./public/
+COPY bootstrap/app.php ./bootstrap/app.php
+
+# Generar APP_KEY
+RUN php artisan key:generate --force
+
+# — Stage 2: runtime PHP + Apache
+FROM php:8.3-apache
+
+# Extensiones necesarias
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends libzip-dev zip unzip libpng-dev libonig-dev && \
+    docker-php-ext-install pdo pdo_mysql mbstring zip && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Habilitar mod_rewrite
 RUN a2enmod rewrite
-RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# --- OPTIMIZACIÓN DE CACHÉ ---
-# Copiar primero solo los archivos de configuración de dependencias
-COPY composer.json composer.lock* ./
-# Instalar dependencias sin autoloader para cachear la capa de Docker
-RUN composer install --no-interaction --no-autoloader --no-scripts
+# Configurar DocumentRoot a /public
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
+    /etc/apache2/sites-available/*.conf && \
+    sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' \
+    /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Luego copiar el resto del código
-COPY . /var/www/html
+# AllowOverride para .htaccess de Laravel
+RUN echo '<Directory ${APACHE_DOCUMENT_ROOT}>\n AllowOverride All\n Require all granted\n</Directory>' \
+    >> /etc/apache2/apache2.conf
 
-# Finalmente generar el autoloader optimizado
-RUN composer dump-autoload --optimize
+# Copiar proyecto desde el builder
+COPY --from=builder /app /var/www/html
 
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Permisos para storage y cache
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database && \
+    chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
+
+# Usar sesiones de archivo en lugar de SQLite (evita problemas de permisos)
+ENV SESSION_DRIVER=file

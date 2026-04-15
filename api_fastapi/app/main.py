@@ -11,11 +11,11 @@ from app.data.database import Base, engine, SessionLocal
 # MODELOS (IMPORTANTE para crear tablas)
 from app.data.models.usuario import Usuario
 from app.data.models.autoparte import Autoparte
-from app.data.models.pedido import Pedido
 from app.data.models.detalle_pedido import DetallePedido
+from app.data.models.pedido import Pedido
 
 # ROUTERS
-from app.routers import usuarios, autopartes, pedidos, reportes
+from app.routers import usuarios, autopartes, pedidos, reportes, reportes_extra
 
 # Seguridad
 from app.core.security import get_password_hash
@@ -31,32 +31,61 @@ while retries > 0:
         # Crear usuario administrador por defecto
         db = SessionLocal()
         try:
-            admin_exist = db.query(Usuario).filter(Usuario.email == "correo@macuin.com").first()
-            if not admin_exist:
-                nuevo_admin = Usuario(
-                    nombre="Admin General", 
-                    email="correo@macuin.com", 
-                    telefono="0000000000", 
-                    password=get_password_hash("password"), 
-                    rol="admin"
-                )
-                db.add(nuevo_admin)
+            # 1. Admin General original
+            admin_orig = db.query(Usuario).filter(Usuario.email == "admin@macuin.com").first()
+            if not admin_orig:
+                db.add(Usuario(
+                    nombre="Administrador", email="admin@macuin.com", telefono="1234567890",
+                    password=get_password_hash("admin123"), rol="admin"
+                ))
             
-            admin_vichdz = db.query(Usuario).filter(Usuario.email == "vichdz@gmail.com").first()
-            if not admin_vichdz:
-                nuevo_vichdz = Usuario(
-                    nombre="Vichdz Admin", 
-                    email="vichdz@gmail.com", 
-                    telefono="0000000000", 
-                    password=get_password_hash("123456"), 
-                    rol="admin"
-                )
-                db.add(nuevo_vichdz)
-            else:
-                admin_vichdz.password = get_password_hash("123456")
+            # 2. Correo macuin legacy
+            admin_mac = db.query(Usuario).filter(Usuario.email == "correo@macuin.com").first()
+            if not admin_mac:
+                db.add(Usuario(
+                    nombre="Macuin Admin", email="correo@macuin.com", telefono="0000000000",
+                    password=get_password_hash("password"), rol="admin"
+                ))
             
+            # 3. Belen (Owner)
+            belen_exist = db.query(Usuario).filter(Usuario.email == "belen@macuin.com").first()
+            if not belen_exist:
+                db.add(Usuario(
+                    nombre="Belén Vega", email="belen@macuin.com", telefono="4421234567",
+                    password=get_password_hash("belen123"), rol="admin"
+                ))
+
             db.commit()
-            print("Usuarios admin por defecto verificados/creados exitosamente.")
+            print("Usuarios maestros restaurados existosamente.")
+
+            # SEED de Autopartes
+            from app.data.models.autoparte import Autoparte
+            if db.query(Autoparte).count() == 0:
+                print("Catálogo vacío. Insertando dataset de prueba...")
+                bateria = Autoparte(
+                    nombre="Batería Automotriz LTH", descripcion="Batería premium de alto rendimiento",
+                    precio=2150.0, stock=10, marca="LTH", categoria="electrico",
+                    imagen="/static/img/BATERÍA AUTOMOTRIZ .webp"
+                )
+                bujias = Autoparte(
+                    nombre="Sistema de Bujías Iridium", descripcion="Bujías de encendido rápido Iridium",
+                    precio=450.0, stock=50, marca="NGK", categoria="motor",
+                    imagen="/static/img/Bujía premium.webp"
+                )
+                frenos = Autoparte(
+                    nombre="Frenos de Cerámica Premium", descripcion="Balatas de alto frenado y resistencia",
+                    precio=950.0, stock=20, marca="Brembo", categoria="frenos",
+                    imagen="/static/img/FRENOS DE CERÁMICA.webp"
+                )
+                filtro = Autoparte(
+                    nombre="Filtro de Aire Alto Flujo", descripcion="Mayor entrada de oxígeno para el motor",
+                    precio=320.0, stock=30, marca="K&N", categoria="motor",
+                    imagen="/static/img/Filtro de aire.webp"
+                )
+                db.add_all([bateria, bujias, frenos, filtro])
+                db.commit()
+                print("Dataset de catálogo insertado correctamente.")
+
         finally:
             db.close()
         
@@ -99,6 +128,7 @@ app.include_router(usuarios.router)
 app.include_router(autopartes.router)
 app.include_router(pedidos.router)
 app.include_router(reportes.router)
+app.include_router(reportes_extra.router)
 
 
 # VISTAS HTML

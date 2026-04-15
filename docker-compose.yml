@@ -17,14 +17,21 @@ services:
       - "8001:8000"
     depends_on:
       - db
+    environment:
+      DATABASE_URL: postgresql://postgres:password@db:5432/macuin
     volumes:
-      - ./cliente_flask/static:/app/static        # ✨ Modificado para apuntar a la carpeta real
-      - ./cliente_flask/templates:/app/templates  # ✨ Modificado para apuntar a la carpeta real
+      - ./api_fastapi:/app
+      - ./cliente_flask/static:/app/static        
+      - ./cliente_flask/templates:/app/templates 
 
   cliente:
     build: ./cliente_flask
     ports:
       - "5001:5000"
+    depends_on:
+      - api
+    environment:
+      API_URL: http://api:8000
     volumes:
       - ./cliente_flask:/app
 
@@ -32,6 +39,13 @@ services:
     build: ./admin_laravel
     ports:
       - "8002:80"
+    depends_on:
+      - api
+    environment:
+      API_URL: http://api:8000
+    volumes:
+      - ./admin_laravel:/var/www/html
+      - /var/www/html/vendor
 
 volumes:
   postgres_data:

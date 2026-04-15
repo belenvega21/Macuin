@@ -5,192 +5,335 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo - MACUIN</title>
 
-    <!-- Tailwind -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts & Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    function verProducto(event, nombre, descripcion, marca, sku, precio, stock, imagen, categoria, productoId) {
+        if (event.target.closest('button')) return;
+        const stockNum = parseInt(stock);
+        const precioNum = parseFloat(precio).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        const stockBadge = stockNum > 0 
+            ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><span class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>${stockNum} disponibles</span>`
+            : `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/20"><span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>Agotado</span>`;
+        const imgHtml = imagen ? `<img src="${imagen}" class="max-h-[220px] mx-auto rounded-2xl object-contain drop-shadow-2xl">` : `<div class="h-[220px] flex items-center justify-center"><span class="material-symbols-rounded text-white/10 text-[100px]">category</span></div>`;
+        const addBtnHtml = stockNum > 0 
+            ? `<button id="swal-add-btn" class="w-full bg-yellow-400 text-black font-extrabold py-3 rounded-full hover:bg-yellow-500 transition flex items-center justify-center gap-2 mt-4"><span class="material-symbols-rounded text-[20px]">add_shopping_cart</span> Agregar al Carrito</button>`
+            : `<button class="w-full bg-white/5 text-gray-500 font-extrabold py-3 rounded-full cursor-not-allowed border border-white/5 flex items-center justify-center gap-2 mt-4"><span class="material-symbols-rounded text-[20px]">block</span> No Disponible</button>`;
 
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+        Swal.fire({
+            html: `
+                <div class="text-left">
+                    <div class="bg-gradient-to-b from-white/[0.03] to-transparent rounded-2xl p-6 mb-6">
+                        ${imgHtml}
+                    </div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-extrabold text-gray-500 uppercase tracking-widest">${marca}</span>
+                        <span class="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-white/5 text-gray-400 border border-white/5">#${sku}</span>
+                    </div>
+                    <h2 class="text-2xl font-black text-white mb-2 tracking-tight">${nombre}</h2>
+                    ${categoria ? `<span class="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 mb-3">${categoria}</span>` : ''}
+                    <p class="text-gray-400 text-sm leading-relaxed mb-4">${descripcion}</p>
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-3xl font-black text-white tracking-tight">$${precioNum}</p>
+                        ${stockBadge}
+                    </div>
+                    ${addBtnHtml}
+                </div>
+            `,
+            background: '#111',
+            color: '#fff',
+            showConfirmButton: false,
+            showCloseButton: true,
+            width: 480,
+            padding: '1.5rem',
+            customClass: { popup: 'rounded-[2rem] border border-white/10' },
+            didOpen: () => {
+                const addBtn = document.getElementById('swal-add-btn');
+                if (addBtn) {
+                    addBtn.addEventListener('click', () => {
+                        addBtn.innerHTML = '<span class="material-symbols-rounded animate-spin text-[20px]">sync</span>';
+                        addBtn.disabled = true;
+                        fetch('/agregar/' + productoId, { method: 'GET', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                        .then(r => { if(!r.ok) throw new Error(); return r.json(); })
+                        .then(() => {
+                            globalCartCount++;
+                            const badge = document.getElementById('contador-carrito');
+                            badge.textContent = globalCartCount;
+                            badge.classList.remove('hidden');
+                            addBtn.innerHTML = '<span class="material-symbols-rounded text-[20px]">check</span> Agregado';
+                            addBtn.classList.remove('bg-yellow-400','hover:bg-yellow-500');
+                            addBtn.classList.add('bg-emerald-500');
+                            Toast.fire({ icon: 'success', title: 'Agregado a tu cesta' });
+                        })
+                        .catch(() => {
+                            Toast.fire({ icon: 'error', title: 'Error al agregar' });
+                            addBtn.innerHTML = '<span class="material-symbols-rounded text-[20px]">add_shopping_cart</span> Agregar al Carrito';
+                            addBtn.disabled = false;
+                        });
+                    });
+                }
+            }
+        });
+    }
+    </script>
 
     <style>
         body {
-            background-color: #0e0e0e;
-            color: white;
+            background-color: #080808;
+            color: #f8fafc;
             font-family: 'Inter', sans-serif;
+        }
+        /* Telegram Glass Blur Effect */
+        .glass-nav {
+            background: rgba(8, 8, 8, 0.65);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        /* Airbnb Rounded Cards */
+        .card-producto {
+            background-color: #111111;
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 4px 40px rgba(0,0,0,0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-producto:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,255,255,0.1);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
         }
     </style>
 </head>
 
-<body class="flex flex-col min-h-screen">
+<body class="flex flex-col min-h-screen relative selection:bg-yellow-400 selection:text-black">
 
+  <!-- Background Accents (Soft Neons) -->
+  <div class="fixed -z-10 top-[-10%] right-[-5%] w-[600px] h-[600px] bg-yellow-400/5 rounded-full blur-[150px] pointer-events-none"></div>
 
-<nav class="fixed top-0 w-full z-50 bg-[#0e0e0e]/80 backdrop-blur border-b border-gray-800">
-    <div class="flex justify-between items-center px-8 py-4">
-  
-      <div class="flex items-center gap-3">
-        <img src="/static/img/nuevologo.png" class="h-10">
-        <span class="font-bold text-lg">MACUIN</span>
-      </div>
-  
-      <div class="hidden md:flex gap-8 text-sm items-center">
-        <a href="/inicio" class="text-yellow-400">Inicio</a>
-        <a href="/catalogo" class="hover:text-yellow-400">Catálogo</a>
+{% set active_page = 'catalogo' %}
+{% set page_title = 'Catálogo de Productos' %}
+{% include '_navbar.html' %}
 
+<main class="flex-1 pt-36 px-6 lg:px-10 pb-16 max-w-7xl mx-auto w-full">
 
-        <a href="/carrito" class="hover:text-yellow-400 relative">
-          Carrito
-          <span id="contador-carrito"
-                class="absolute -top-2 -right-4 bg-yellow-400 text-black text-xs px-2 py-0.5 rounded-full">
-          </span>
-        </a>
-
-        <a href="/perfil" class="hover:text-yellow-400">Perfil</a>
-      </div>
-  
-      <a href="/login" class="bg-yellow-400 text-black px-4 py-2 rounded-lg font-semibold hover:bg-yellow-300 transition">
-        Cerrar sesión
-      </a>
-  
-    </div>
-</nav>
-
-
-<main class="flex-1 pt-36 px-6 lg:px-10 pb-10">
-
-
-    <div class="mb-12">
-        <h2 class="text-5xl font-extrabold leading-[1.2] pb-3 bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
-            Catálogo
+    <div class="mb-12 text-center md:text-left">
+        <h2 class="text-[3rem] font-extrabold leading-tight tracking-tight mb-2">
+            Catálogo de <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200">Productos</span>
         </h2>
-
-        <p class="text-gray-400 text-lg mt-2">
-            Encuentra las mejores autopartes para tu vehículo 
+        <p class="text-gray-400 text-lg max-w-2xl font-medium">
+            Refacciones de precisión con diseño optimizado para un rendimiento absoluto.
         </p>
     </div>
 
-
+    <!-- Filters (Soft Pill Design) -->
     <form method="GET" action="/catalogo"
-        class="mb-12 flex flex-wrap gap-4 items-center bg-[#111] p-5 rounded-2xl border border-gray-800 shadow-md">
+        class="mb-12 flex flex-col sm:flex-row flex-wrap gap-3 items-center bg-[#111] p-2 rounded-[2rem] border border-white/5 shadow-2xl">
 
-        <input type="text" name="q" placeholder="Buscar producto..."
-            value="{{ request.args.get('q','') }}"
-            class="px-4 py-2 rounded-lg bg-[#0e0e0e] border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 transition">
+        <div class="relative w-full sm:w-auto flex-1 group">
+            <span class="material-symbols-rounded absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-yellow-400 transition text-[18px]">search</span>
+            <input type="text" name="q" placeholder="Buscar autoparte o SKU..."
+                value="{{ request.args.get('q','') }}"
+                class="w-full px-4 py-2.5 pl-11 text-sm rounded-full bg-black/50 border border-transparent text-white focus:outline-none focus:border-yellow-400 focus:bg-black/80 transition shadow-inner">
+        </div>
 
-        <select name="categoria"
-            class="px-4 py-2 rounded-lg bg-[#0e0e0e] border border-gray-700 text-white">
-            <option value="">Categoría</option>
-            <option value="motor" {% if request.args.get('categoria')=='motor' %}selected{% endif %}>Motor</option>
-            <option value="frenos" {% if request.args.get('categoria')=='frenos' %}selected{% endif %}>Frenos</option>
-            <option value="suspension" {% if request.args.get('categoria')=='suspension' %}selected{% endif %}>Suspensión</option>
-        </select>
+        <div class="relative custom-select-wrapper group" style="min-width: 180px;">
+            <input type="hidden" name="categoria" value="{{ request.args.get('categoria', '') }}">
+            <button type="button" class="w-full px-5 py-2.5 rounded-full bg-black/50 border border-transparent text-gray-400 hover:text-white focus:border-yellow-400 focus:bg-black/80 transition flex items-center justify-between gap-2 text-sm shadow-inner" onclick="toggleDropdown(this, event)">
+                <span class="selected-label font-medium">Todas las categorías</span>
+                <span class="material-symbols-rounded text-[18px]">expand_more</span>
+            </button>
+            <div class="absolute top-full left-0 mt-2 w-full min-w-[200px] bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-xl z-50 hidden opacity-0 transition-opacity duration-200 dropdown-menu overflow-hidden">
+                <ul class="py-1 text-sm text-gray-300 font-medium">
+                    <li><button type="button" data-val="" onclick="selectOption(this)" class="w-full text-left px-5 py-2.5 hover:bg-yellow-400 hover:text-black transition">Todas las categorías</button></li>
+                    <li><button type="button" data-val="motor" onclick="selectOption(this)" class="w-full text-left px-5 py-2.5 hover:bg-yellow-400 hover:text-black transition">Motor</button></li>
+                    <li><button type="button" data-val="frenos" onclick="selectOption(this)" class="w-full text-left px-5 py-2.5 hover:bg-yellow-400 hover:text-black transition">Frenos</button></li>
+                    <li><button type="button" data-val="suspension" onclick="selectOption(this)" class="w-full text-left px-5 py-2.5 hover:bg-yellow-400 hover:text-black transition">Suspensión</button></li>
+                    <li><button type="button" data-val="electrico" onclick="selectOption(this)" class="w-full text-left px-5 py-2.5 hover:bg-yellow-400 hover:text-black transition">Eléctrico</button></li>
+                </ul>
+            </div>
+        </div>
 
-        <select name="marca"
-            class="px-4 py-2 rounded-lg bg-[#0e0e0e] border border-gray-700 text-white">
-            <option value="">Marca</option>
-            {% for m in marcas %}
-            <option value="{{ m.nombre }}"
-                {% if request.args.get('marca') == m.nombre %}selected{% endif %}>
-                {{ m.nombre | capitalize }}
-            </option>
-            {% endfor %}
-        </select>
+        <div class="relative custom-select-wrapper group" style="min-width: 160px;">
+            <input type="hidden" name="marca" value="{{ request.args.get('marca', '') }}">
+            <button type="button" class="w-full px-5 py-2.5 rounded-full bg-black/50 border border-transparent text-gray-400 hover:text-white focus:border-yellow-400 focus:bg-black/80 transition flex items-center justify-between gap-2 text-sm shadow-inner" onclick="toggleDropdown(this, event)">
+                <span class="selected-label font-medium">Todas las marcas</span>
+                <span class="material-symbols-rounded text-[18px]">expand_more</span>
+            </button>
+            <div class="absolute top-full left-0 mt-2 w-full min-w-[180px] bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-xl z-50 hidden opacity-0 transition-opacity duration-200 dropdown-menu overflow-hidden max-h-60 overflow-y-auto custom-scrollbar">
+                <ul class="py-1 text-sm text-gray-300 font-medium">
+                    <li><button type="button" data-val="" onclick="selectOption(this)" class="w-full text-left px-5 py-2.5 hover:bg-yellow-400 hover:text-black transition">Todas las marcas</button></li>
+                    {% for m in marcas %}
+                    <li><button type="button" data-val="{{ m.nombre }}" onclick="selectOption(this)" class="w-full text-left px-5 py-2.5 hover:bg-yellow-400 hover:text-black transition">{{ m.nombre | capitalize }}</button></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
 
         <button type="submit"
-            class="bg-yellow-400 text-black px-5 py-2 rounded-lg font-semibold hover:bg-yellow-300 transition">
-            Filtrar
+            class="w-full sm:w-auto bg-gray-800 text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-yellow-400 hover:text-black transition flex items-center justify-center gap-2 shadow-lg">
+            <span class="material-symbols-rounded text-[18px]">filter_list</span> Filtrar
         </button>
 
     </form>
 
-
+    <!-- Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
 
         {% for producto in productos %}
-        <div class="group bg-[#111] rounded-2xl overflow-hidden shadow-lg hover:shadow-yellow-500/20 transition duration-300">
-
-
-            <div class="w-full h-44 flex items-center justify-center bg-white relative">
+        <div class="card-producto flex flex-col h-full overflow-hidden group cursor-pointer"
+             onclick="verProducto(event, '{{ producto.nombre }}', '{{ producto.descripcion }}', '{{ producto.marca }}', '{{ producto.sku if producto.sku else producto.id }}', '{{ producto.precio }}', '{{ producto.stock }}', '{{ producto.imagen }}', '{{ producto.categoria }}', '{{ producto.id }}')">
+            
+            <div class="relative bg-gradient-to-b from-white/[0.03] to-transparent h-56 flex items-center justify-center p-6 mb-2">
+                <span class="material-symbols-rounded text-white/5 text-[80px] absolute group-hover:scale-110 transition duration-500">category</span>
+                
+                {% if producto.imagen %}
+                <img src="{{ producto.imagen }}" class="max-h-full max-w-full rounded-2xl drop-shadow-2xl z-10 transition duration-500 group-hover:scale-110 object-contain">
+                {% endif %}
+                
                 {% if producto.stock > 0 %}
-                <span class="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded-md font-semibold">
-                    Disponible ({{ producto.stock }})
+                <span class="absolute top-4 left-4 bg-emerald-500/10 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest text-emerald-400 border border-emerald-500/20 shadow-sm z-20 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> IN STOCK
                 </span>
                 {% else %}
-                <span class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-md font-semibold">
-                    Agotado
+                <span class="absolute top-4 left-4 bg-red-500/10 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest text-red-500 border border-red-500/20 shadow-sm z-20 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span> OUT OF STOCK
                 </span>
                 {% endif %}
-
-                <img src="{{ producto.imagen }}" 
-                     class="max-h-full object-contain p-4 group-hover:scale-105 transition duration-300">
             </div>
 
+            <div class="px-6 pb-6 flex flex-col flex-grow">
+                
+                <div class="flex justify-between items-center mb-3">
+                    <p class="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest">{{ producto.marca }}</p>
+                    <p class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-white/5 text-gray-400 border border-white/5">#{{ producto.sku if producto.sku else (producto.id) }}</p>
+                </div>
+                
+                <h3 class="text-[1.15rem] font-bold text-white mb-2 leading-tight tracking-tight">{{ producto.nombre }}</h3>
+                <p class="text-gray-400 text-sm line-clamp-2 mb-6">{{ producto.descripcion }}</p>
 
-            <div class="p-5 space-y-2">
-
-                <h3 class="text-lg font-semibold group-hover:text-yellow-400 transition">
-                    {{ producto.nombre }}
-                </h3>
-
-                <p class="text-sm text-gray-400">
-                    {{ producto.descripcion }}
-                </p>
-
-                <p class="text-xs text-gray-500">
-                    Marca: <span class="text-gray-300">{{ producto.marca | capitalize }}</span>
-                    {% if producto.sku %} | SKU: <span class="text-gray-300">{{ producto.sku }}</span>{% endif %}
-                </p>
-
-
-                <div class="flex items-center justify-between mt-4">
-
-                    <span class="text-2xl font-bold text-yellow-400">
-                        ${{ producto.precio }}
-                    </span>
+                <div class="mt-auto">
+                    <p class="text-[1.75rem] font-extrabold text-white mb-4 tracking-tight">${{ "{:,.2f}".format(producto.precio) }}</p>
 
                     {% if producto.stock > 0 %}
-                    <button onclick="agregarAlCarritoBackend('{{ producto.id }}', this)"
-   class="bg-yellow-400 text-black px-4 py-2 rounded-lg font-semibold 
-          hover:bg-yellow-300 hover:scale-105 transition text-sm">
-   🛒 Agregar
-</button>
+                    <button onclick="event.stopPropagation(); agregarAlCarritoBackend('{{ producto.id }}', this)"
+                            class="w-full bg-yellow-400 text-black font-extrabold py-3.5 rounded-full 
+                                   hover:bg-yellow-500 hover:shadow-[0_0_20px_rgba(255,193,7,0.4)]
+                                   transition flex items-center justify-center gap-2 group/btn">
+                        <span class="material-symbols-rounded text-[20px] group-hover/btn:-rotate-12 transition">add_shopping_cart</span>
+                        Agregar 
+                    </button>
                     {% else %}
-                    <span class="bg-gray-600 text-gray-400 px-4 py-2 rounded-lg font-semibold text-sm cursor-not-allowed">
-                        Agotado
-                    </span>
+                    <button onclick="event.stopPropagation()" class="w-full bg-white/5 text-gray-500 font-extrabold py-3.5 rounded-full cursor-not-allowed border border-white/5 flex items-center justify-center gap-2">
+                        <span class="material-symbols-rounded text-[20px]">block</span> No Disponible
+                    </button>
                     {% endif %}
-
                 </div>
+
             </div>
         </div>
         {% endfor %}
 
     </div>
 
+    {% if not productos %}
+    <div class="text-center py-24 bg-white/5 rounded-[2rem] border border-white/5 mt-8 backdrop-blur-xl">
+      <span class="material-symbols-rounded text-gray-600 text-[80px] mb-4">inventory_2</span>
+      <h3 class="text-xl font-bold text-gray-300">No se encontraron productos.</h3>
+      <p class="text-gray-500 mt-2">Intenta ajustar tus filtros de búsqueda.</p>
+    </div>
+    {% endif %}
+
 </main>
 
-
-<footer class="bg-[#0e0e0e] border-t border-gray-800 text-center py-6 text-gray-500 text-sm">
-    © 2026 MACUIN - Autopartes
+<footer class="border-t border-white/5 bg-[#080808]/80 backdrop-blur-xl py-10 text-center text-gray-500 text-sm mt-auto">
+    <div class="flex items-center justify-center gap-2 mb-3">
+      <img src="/static/img/nuevologo.png" class="h-4 w-auto drop-shadow-sm" alt="MACUIN">
+      <span class="font-extrabold tracking-widest text-gray-400 text-xs">MACUIN.STORE</span>
+    </div>
+    <p class="font-medium text-xs">© 2026 Todos los derechos reservados · Ingeniería Automotriz</p>
 </footer>
 
-
-<div id="toast" class="fixed bottom-5 right-5 bg-yellow-400 text-black px-5 py-3 rounded-lg shadow-lg opacity-0 translate-y-10 transition duration-300">
-    <div class="flex items-center gap-2 font-bold">
-        Producto agregado
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-        </svg>
-    </div>
-</div>
 <script>
+    // Configuración Base SweetAlert Modernizada
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'bottom-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        background: '#111',
+        color: '#fff',
+        iconColor: '#facc15',
+        customClass: { popup: 'rounded-2xl border border-gray-800 shadow-2xl' }
+    });
 
-    // Counter variable state
-    let globalCartCount = 0;
+    let globalCartCount = 0; 
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => {
+            const val = wrapper.querySelector('input[type="hidden"]').value;
+            if(val) {
+                const btn = wrapper.querySelector(`ul button[data-val="${val}"]`);
+                if(btn) wrapper.querySelector('.selected-label').textContent = btn.textContent;
+            }
+        });
+
+        document.addEventListener("click", e => {
+            if (!e.target.closest('.custom-select-wrapper')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.add('opacity-0');
+                    setTimeout(() => menu.classList.add('hidden'), 200);
+                });
+            }
+        });
+    });
+
+    function toggleDropdown(btn, event) {
+        event.stopPropagation();
+        const targetMenu = btn.nextElementSibling;
+        const isHidden = targetMenu.classList.contains('hidden');
+        
+        // Cierra los demás menús
+        document.querySelectorAll('.dropdown-menu').forEach(m => {
+            if (m !== targetMenu) {
+                m.classList.add('opacity-0');
+                setTimeout(() => m.classList.add('hidden'), 200);
+            }
+        });
+
+        // Alterna el menú actual
+        if (isHidden) {
+            targetMenu.classList.remove('hidden');
+            setTimeout(() => targetMenu.classList.remove('opacity-0'), 10);
+        } else {
+            targetMenu.classList.add('opacity-0');
+            setTimeout(() => targetMenu.classList.add('hidden'), 200);
+        }
+    }
+
+    function selectOption(btn) {
+        const val = btn.getAttribute('data-val');
+        const wrapper = btn.closest('.custom-select-wrapper');
+        wrapper.querySelector('input[type="hidden"]').value = val;
+        wrapper.querySelector('.selected-label').textContent = btn.textContent;
+        const menu = btn.closest('.dropdown-menu');
+        menu.classList.add('opacity-0');
+        setTimeout(() => menu.classList.add('hidden'), 200);
+    }
 
     function agregarAlCarritoBackend(productoId, btn) {
-        // Disable temporarily to prevent spam clicks
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '⏳ Agregando...';
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-rounded animate-spin text-[20px]">sync</span>';
         btn.disabled = true;
+        btn.classList.add('opacity-80', 'cursor-wait');
 
         fetch("/agregar/" + productoId, {
             method: 'GET',
@@ -201,31 +344,39 @@
                 window.location.href = "/login";
                 return;
             }
-            // Increment local visual counter
-            globalCartCount++;
-            document.getElementById("contador-carrito").textContent = globalCartCount;
-            
-            // Show toast
-            const toast = document.getElementById("toast");
-            toast.classList.remove("opacity-0", "translate-y-10");
-            setTimeout(() => {
-                toast.classList.add("opacity-0", "translate-y-10");
-            }, 2000);
+            if(!response.ok) throw new Error("Error HTTP");
 
-            // Restore button
-            btn.innerHTML = '✔️ Agregado';
+            globalCartCount++;
+            const badge = document.getElementById("contador-carrito");
+            badge.textContent = globalCartCount;
+            badge.classList.remove('hidden');
+            
+            badge.classList.remove('scale-100');
+            badge.classList.add('scale-125', 'bg-white');
+            setTimeout(()=> badge.classList.remove('scale-125', 'bg-white'), 300);
+
+            Toast.fire({ icon: 'success', title: 'Agregado a tu cesta' });
+
+            btn.innerHTML = '<span class="material-symbols-rounded text-[20px]">check</span>';
+            btn.classList.remove('bg-yellow-400', 'hover:bg-yellow-500');
+            btn.classList.add('bg-emerald-500', 'text-black', 'border-transparent');
+            
             setTimeout(() => {
-                btn.innerHTML = originalText;
+                btn.innerHTML = originalHTML;
+                btn.classList.add('bg-yellow-400', 'hover:bg-yellow-500');
+                btn.classList.remove('bg-emerald-500', 'text-black', 'opacity-80', 'cursor-wait');
                 btn.disabled = false;
-            }, 2000);
+            }, 1000);
         })
         .catch(err => {
             console.error(err);
-            btn.innerHTML = originalText;
+            Toast.fire({ icon: 'error', title: 'Error al agregar' });
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('opacity-80', 'cursor-wait');
             btn.disabled = false;
         });
     }
-    
-    </script>
+</script>
+
 </body>
 </html>

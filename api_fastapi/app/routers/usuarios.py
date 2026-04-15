@@ -155,6 +155,45 @@ def actualizar_usuario(
     return {"msg": f"Usuario {usuario_id} actualizado exitosamente"}
 
 
+# ELIMINAR USUARIO (CRUD - Delete)
+@router.delete("/{usuario_id}", summary="Eliminar usuario")
+def eliminar_usuario(usuario_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    if current_user["rol"] != "admin":
+        raise HTTPException(status_code=403, detail="Solo el administrador puede eliminar usuarios")
+        
+    user = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    db.delete(user)
+    db.commit()
+    return {"msg": "Usuario eliminado exitosamente"}
+
+
+# ACTUALIZAR PASSWORD
+@router.patch("/{usuario_id}/password", summary="Actualizar contraseña de usuario")
+def actualizar_password(
+    usuario_id: int,
+    password_actual: str = Form(...),
+    nueva_password: str = Form(...),
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    user = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+    if current_user["rol"] != "admin" and current_user["email"] != user.email:
+        raise HTTPException(status_code=403, detail="Sin permisos")
+
+    if not verify_password(password_actual, user.password):
+        raise HTTPException(status_code=400, detail="La contraseña actual es incorrecta")
+        
+    user.password = get_password_hash(nueva_password)
+    db.commit()
+    return {"msg": "Contraseña actualizada exitosamente"}
+
+
 # SUBIR FOTO DE PERFIL
 @router.post("/{usuario_id}/upload_perfil", summary="Subir imagen de perfil")
 def upload_perfil(

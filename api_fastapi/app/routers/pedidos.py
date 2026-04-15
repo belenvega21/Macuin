@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.data.database import SessionLocal
-from app.data.models.pedido import Pedido
 from app.data.models.detalle_pedido import DetallePedido
+from app.data.models.pedido import Pedido
+from app.data.models.autoparte import Autoparte
 from app.data.schemas.pedido import PedidoBase, PedidoEstado
 from app.core.security import get_current_user, get_current_admin
 
@@ -59,6 +60,7 @@ def crear_pedido(data: PedidoBase, current_user: dict = Depends(get_current_user
 @router.get("/", summary="Consultar todos los pedidos")
 def obtener_pedidos(db: Session = Depends(get_db)):
     pedidos = db.query(Pedido).all()
+    autopartes_map = {a.id: a for a in db.query(Autoparte).all()}
 
     resultado = []
 
@@ -66,20 +68,29 @@ def obtener_pedidos(db: Session = Depends(get_db)):
         detalles = db.query(DetallePedido).filter(DetallePedido.pedido_id == pedido.id).all()
 
         productos = []
+        total = 0
         for d in detalles:
+            ap = autopartes_map.get(d.autoparte_id)
+            precio_unitario = ap.precio if ap else 0
+            subtotal = precio_unitario * d.cantidad
+            total += subtotal
             productos.append({
                 "autoparte_id": d.autoparte_id,
-                "cantidad": d.cantidad
+                "cantidad": d.cantidad,
+                "precio_unitario": float(precio_unitario),
+                "subtotal": float(subtotal)
             })
 
         resultado.append({
             "id": pedido.id,
             "usuario_id": pedido.usuario_id,
             "estado": pedido.estado,
-            "fecha": str(pedido.fecha) if pedido.fecha else None,
+            "fecha": pedido.fecha.isoformat() if pedido.fecha else None,
             "paqueteria": pedido.paqueteria,
             "num_seguimiento": pedido.num_seguimiento,
-            "productos": productos
+            "total": float(total),
+            "productos": productos,
+            "detalles": productos
         })
 
     return resultado
@@ -92,7 +103,7 @@ def cambiar_estado(pedido_id: int, data: PedidoEstado, current_user: dict = Depe
     if not pedido:
         raise HTTPException(status_code=404, detail="Pedido no encontrado")
 
-    estados_validos = ["recibido", "en_proceso", "enviado", "entregado", "cancelado"]
+    estados_validos = ["recibido", "en_proceso", "enviado", "en_ruta", "entregado", "cancelado"]
     if data.estado not in estados_validos:
         raise HTTPException(status_code=400, detail=f"Estado inválido. Opciones: {estados_validos}")
 

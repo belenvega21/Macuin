@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.data.database import SessionLocal
 from app.data.models.autoparte import Autoparte
@@ -6,11 +7,13 @@ from app.data.models.pedido import Pedido
 from app.data.models.detalle_pedido import DetallePedido
 from app.data.models.usuario import Usuario
 import pandas as pd
+from datetime import datetime
 from fastapi.responses import FileResponse
 from docx import Document 
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
+from collections import defaultdict
 
 router = APIRouter(prefix="/reportes", tags=["Reportes"])
 
@@ -83,7 +86,8 @@ def exportar_inventario_excel(db: Session = Depends(get_db)):
     ]
 
     df = pd.DataFrame(data)
-    file_path = "/tmp/reporte_inventario.xlsx"
+    import tempfile, os
+    file_path = os.path.join(tempfile.gettempdir(), "reporte_inventario.xlsx")
     df.to_excel(file_path, index=False, startrow=2)
 
     from openpyxl import load_workbook
@@ -170,7 +174,8 @@ def exportar_inventario_word(db: Session = Depends(get_db)):
         row[4].text = f"${prod.precio:,.2f}"
         row[5].text = f"{prod.stock} pz"
 
-    file_path = "/tmp/reporte_inventario.docx"
+    import tempfile, os
+    file_path = os.path.join(tempfile.gettempdir(), "reporte_inventario.docx")
     doc.save(file_path)
     return FileResponse(file_path, filename="reporte_inventario.docx")
 
@@ -178,56 +183,110 @@ def exportar_inventario_word(db: Session = Depends(get_db)):
 # inventario pdf
 @router.get("/inventario/pdf")
 def exportar_inventario_pdf(db: Session = Depends(get_db)):
-    productos = db.query(Autoparte).all()
+    from reportlab.platypus import Image as RLImage
+    from PIL import Image, ImageDraw
+    import requests
+    from io import BytesIO
+    import os
 
-    file_path = "/tmp/reporte_inventario.pdf"
-    doc = SimpleDocTemplate(file_path, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40, title="Reporte de Inventario", author="MACUIN Autopartes")
+    productos = db.query(Autoparte).all()
+    import tempfile, os
+    file_path = os.path.join(tempfile.gettempdir(), "reporte_inventario.pdf")
+    
+    # Modern Document Margins & Title
+    doc = SimpleDocTemplate(file_path, rightMargin=30, leftMargin=30, topMargin=50, bottomMargin=50, title="Directorio de Inventario", author="MACUIN Autopartes")
     styles = getSampleStyleSheet()
 
     elementos = []
     
-    # Encabezado
+    # Encabezado (Modern Minimalist)
     header_data = [
-        [Paragraph("<b>MACUIN AUTOPARTES</b>", styles["Heading1"]), Paragraph("<font size=12><b>Reporte de Inventario</b></font>", styles["Normal"])]
+        [Paragraph("<font size=24><b>MACUIN</b></font><br/><font color='#b0b0b0' size=10>AUTOPARTES</font>", styles["Normal"]), 
+         Paragraph("<font size=14><b>Catálogo de Inventario</b></font><br/><font color='#888888'>Documento Oficial</font>", styles["Normal"])]
     ]
-    header_table = Table(header_data, colWidths=[300, 200])
+    header_table = Table(header_data, colWidths=[300, 230])
     header_table.setStyle(TableStyle([
         ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
-        ('BACKGROUND', (1, 0), (1, 0), colors.HexColor("#f0f0f0")),
-        ('PADDING', (1, 0), (1, 0), 10),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 15),
     ]))
     elementos.append(header_table)
-    elementos.append(Spacer(1, 20))
-
-    # Info General
-    elementos.append(Paragraph(f"<b>Total de referencias:</b> {len(productos)} piezas únicas", styles["Normal"]))
     elementos.append(Spacer(1, 10))
 
-    # Tabla Inventario
-    tabla_data = [["ID", "Nombre", "Marca", "Stock", "Precio Público"]]
-    for p in productos:
-        tabla_data.append([
-            f"#{p.id}",
-            p.nombre,
-            p.marca,
-            f"{p.stock} pz",
-            f"${p.precio:,.2f}"
-        ])
+    elementos.append(Paragraph(f"<font color='#3b82f6'><b>Total de referencias registradas:</b></font> {len(productos)} piezas únicas", styles["Normal"]))
+    elementos.append(Spacer(1, 20))
 
-    t = Table(tabla_data, colWidths=[50, 200, 100, 70, 80])
+    # Definir Helper de Imagen con Bordes Redondeados
+    def fetch_rounded_image(url_or_path, size=40, radius=10):
+        try:
+            if not url_or_path:
+                raise Exception("No image")
+            
+            if url_or_path.startswith("http"):
+                # Handle localhost fallback if needed
+                fetch_url = url_or_path.replace("localhost:8001", "127.0.0.1:8000")
+            elif url_or_path.startswith("/"):
+                fetch_url = f"http://127.0.0.1:8000{url_or_path}"
+            else:
+                fetch_url = f"http://127.0.0.1:8000/{url_or_path}"
+                
+            resp = requests.get(fetch_url, timeout=2)
+            img_data = BytesIO(resp.content)
+            img = Image.open(img_data).convert("RGBA")
+            
+            # Resize
+            img = img.resize((size, size), Image.Resampling.LANCZOS)
+            
+            # Mask
+            mask = Image.new("L", (size, size), 0)
+            draw = ImageDraw.Draw(mask)
+            draw.rounded_rectangle((0, 0, size, size), radius=radius, fill=255)
+            
+            # Apply mask & white background
+            bg = Image.new("RGBA", (size, size), (255, 255, 255, 255))
+            bg.paste(img, (0,0), mask=mask)
+            
+            img_io = BytesIO()
+            bg.save(img_io, format="PNG")
+            img_io.seek(0)
+            
+            rl_img = RLImage(img_io, width=size, height=size, mask='auto')
+            return rl_img
+        except Exception:
+            return Paragraph("<font color='#cccccc'><i>S/I</i></font>", styles["Normal"])
+
+    # Tabla Inventario Moderno
+    tabla_data = [["Visual", "Detalle de Producto", "Marca", "Stock", "Precio Público"]]
+    
+    for p in productos:
+        rl_img = fetch_rounded_image(p.imagen, size=40, radius=8)
+        
+        detalle = Paragraph(f"<b>{p.nombre}</b><br/><font size=8 color='#888888'>SKU: {p.sku or 'N/A'}</font>", styles["Normal"])
+        marca = Paragraph(f"<font size=9>{p.marca}</font>", styles["Normal"])
+        stock_txt = f"<font color='#10b981'><b>{p.stock} pz</b></font>" if p.stock > 10 else f"<font color='#ef4444'><b>{p.stock} pz</b></font>"
+        stock = Paragraph(stock_txt, styles["Normal"])
+        precio = Paragraph(f"<b>${p.precio:,.2f}</b>", styles["Normal"])
+        
+        tabla_data.append([rl_img, detalle, marca, stock, precio])
+
+    t = Table(tabla_data, colWidths=[60, 240, 80, 70, 80])
     t.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#333333")),
-        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#f8fafc")),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.HexColor("#334155")),
         ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0,0), (-1,0), 12),
+        ('TOPPADDING', (0,0), (-1,0), 12),
+        ('LINEBELOW', (0,0), (-1,0), 1, colors.HexColor("#e2e8f0")),
         ('ALIGN', (3,1), (-1,-1), 'RIGHT'),
-        ('LINEBELOW', (0,0), (-1,-1), 0.5, colors.HexColor("#e0e0e0")),
-        ('PADDING', (0,0), (-1,-1), 8),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('LINEBELOW', (0,1), (-1,-1), 0.5, colors.HexColor("#f1f5f9")),
+        ('PADDING', (0,1), (-1,-1), 8),
     ]))
     elementos.append(t)
 
     doc.build(elementos)
 
-    return FileResponse(file_path, media_type="application/pdf", headers={"Content-Disposition": "inline; filename=\"reporte_inventario.pdf\""})
+    return FileResponse(file_path, media_type="application/pdf", headers={"Content-Disposition": "inline; filename=\"reporte_inventario_pro.pdf\""})
 
 
 # clientes excel
@@ -237,7 +296,8 @@ def exportar_clientes_excel(db: Session = Depends(get_db)):
     usuarios = db.query(Usuario).all()
     data = [{"ID": u.id, "Nombre": u.nombre, "Email": u.email, "Teléfono": u.telefono or "N/A", "Rol": u.rol} for u in usuarios]
     df = pd.DataFrame(data)
-    file_path = "/tmp/reporte_clientes.xlsx"
+    import tempfile, os
+    file_path = os.path.join(tempfile.gettempdir(), "reporte_clientes.xlsx")
     df.to_excel(file_path, index=False, startrow=2)
     from openpyxl import load_workbook
     wb = load_workbook(file_path)
@@ -305,7 +365,8 @@ def exportar_clientes_word(db: Session = Depends(get_db)):
         row[2].text = u.email
         row[3].text = u.telefono or "N/A"
         row[4].text = u.rol
-    file_path = "/tmp/reporte_clientes.docx"
+    import tempfile, os
+    file_path = os.path.join(tempfile.gettempdir(), "reporte_clientes.docx")
     doc.save(file_path)
     return FileResponse(file_path, filename="reporte_clientes.docx")
 
@@ -315,7 +376,8 @@ def exportar_clientes_word(db: Session = Depends(get_db)):
 def exportar_clientes_pdf(db: Session = Depends(get_db)):
     usuarios = db.query(Usuario).all()
 
-    file_path = "/tmp/reporte_clientes.pdf"
+    import tempfile, os
+    file_path = os.path.join(tempfile.gettempdir(), "reporte_clientes.pdf")
     doc = SimpleDocTemplate(file_path, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40, title="Reporte de Clientes", author="MACUIN Autopartes")
     styles = getSampleStyleSheet()
 
@@ -363,15 +425,22 @@ def exportar_clientes_pdf(db: Session = Depends(get_db)):
 
 # pedidos excel
 @router.get("/pedidos/excel")
-def exportar_pedidos_excel(db: Session = Depends(get_db)):
+def exportar_pedidos_excel(start_date: Optional[str] = Query(None), end_date: Optional[str] = Query(None), db: Session = Depends(get_db)):
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-    pedidos_db = db.query(Pedido).all()
+    from datetime import datetime
+    query = db.query(Pedido)
+    if start_date:
+        query = query.filter(Pedido.fecha >= datetime.fromisoformat(start_date))
+    if end_date:
+        query = query.filter(Pedido.fecha <= datetime.fromisoformat(end_date))
+    pedidos_db = query.all()
     data = []
     for p in pedidos_db:
         detalles = db.query(DetallePedido).filter(DetallePedido.pedido_id == p.id).all()
         data.append({"Pedido": f"ORD-{str(p.id).zfill(4)}", "Usuario ID": p.usuario_id, "Estado": p.estado, "Artículos": len(detalles)})
     df = pd.DataFrame(data)
-    file_path = "/tmp/reporte_pedidos.xlsx"
+    import tempfile, os
+    file_path = os.path.join(tempfile.gettempdir(), "reporte_pedidos.xlsx")
     df.to_excel(file_path, index=False, startrow=2)
     from openpyxl import load_workbook
     wb = load_workbook(file_path)
@@ -405,10 +474,16 @@ def exportar_pedidos_excel(db: Session = Depends(get_db)):
 
 # pedidos word
 @router.get("/pedidos/word")
-def exportar_pedidos_word(db: Session = Depends(get_db)):
+def exportar_pedidos_word(start_date: Optional[str] = Query(None), end_date: Optional[str] = Query(None), db: Session = Depends(get_db)):
     from docx.shared import Pt, RGBColor
     from docx.enum.table import WD_TABLE_ALIGNMENT
-    pedidos_db = db.query(Pedido).all()
+    from datetime import datetime
+    query = db.query(Pedido)
+    if start_date:
+        query = query.filter(Pedido.fecha >= datetime.fromisoformat(start_date))
+    if end_date:
+        query = query.filter(Pedido.fecha <= datetime.fromisoformat(end_date))
+    pedidos_db = query.all()
     doc = Document()
     doc.add_heading("MACUIN AUTOPARTES", 0)
     doc.add_heading("Reporte Histórico de Pedidos", level=2)
@@ -438,17 +513,25 @@ def exportar_pedidos_word(db: Session = Depends(get_db)):
         row[1].text = f"ID: {p.usuario_id}"
         row[2].text = p.estado
         row[3].text = f"{len(detalles)} items"
-    file_path = "/tmp/reporte_pedidos.docx"
+    import tempfile, os
+    file_path = os.path.join(tempfile.gettempdir(), "reporte_pedidos.docx")
     doc.save(file_path)
     return FileResponse(file_path, filename="reporte_pedidos.docx")
 
 
 # pedidos pdf
 @router.get("/pedidos/pdf")
-def exportar_pedidos_pdf(db: Session = Depends(get_db)):
-    pedidos = db.query(Pedido).all()
+def exportar_pedidos_pdf(start_date: Optional[str] = Query(None), end_date: Optional[str] = Query(None), db: Session = Depends(get_db)):
+    from datetime import datetime
+    query = db.query(Pedido)
+    if start_date:
+        query = query.filter(Pedido.fecha >= datetime.fromisoformat(start_date))
+    if end_date:
+        query = query.filter(Pedido.fecha <= datetime.fromisoformat(end_date))
+    pedidos = query.all()
 
-    file_path = "/tmp/reporte_pedidos.pdf"
+    import tempfile, os
+    file_path = os.path.join(tempfile.gettempdir(), "reporte_pedidos.pdf")
     doc = SimpleDocTemplate(file_path, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40, title="Reporte de Pedidos", author="MACUIN Autopartes")
     styles = getSampleStyleSheet()
 
@@ -475,7 +558,7 @@ def exportar_pedidos_pdf(db: Session = Depends(get_db)):
             f"ORD-{str(p.id).zfill(4)}",
             f"ID: {p.usuario_id}",
             p.estado,
-            f"{len(p.productos)} items"
+            f"{len(p.items)} items"
         ])
 
     t = Table(tabla_data, colWidths=[80, 100, 160, 100])
@@ -494,11 +577,101 @@ def exportar_pedidos_pdf(db: Session = Depends(get_db)):
     return FileResponse(file_path, media_type="application/pdf", headers={"Content-Disposition": "inline; filename=\"reporte_pedidos.pdf\""})
 
 
+# recibo de pedido individual pdf
+@router.get("/pedidos/{pedido_id}/recibo/pdf")
+def exportar_recibo_pdf(pedido_id: int, db: Session = Depends(get_db)):
+    pedido = db.query(Pedido).filter(Pedido.id == pedido_id).first()
+    if not pedido: return {"error": "Pedido no encontrado"}
+    
+    usuario = db.query(Usuario).filter(Usuario.id == pedido.usuario_id).first()
+    detalles = db.query(DetallePedido).filter(DetallePedido.pedido_id == pedido_id).all()
+    autopartes = {a.id: a for a in db.query(Autoparte).all()}
+    
+    import tempfile, os
+    file_path = os.path.join(tempfile.gettempdir(), f"recibo_orden_{pedido_id}.pdf")
+    doc = SimpleDocTemplate(file_path, rightMargin=40, leftMargin=40, topMargin=50, bottomMargin=50, title=f"Recibo Pedido #{pedido_id}", author="MACUIN")
+    styles = getSampleStyleSheet()
+    elementos = []
+
+    # Encabezado
+    header_data = [
+        [Paragraph("<font size=20><b>MACUIN AUTOPARTES</b></font>", styles["Normal"]), Paragraph("<font size=12 color='#888888'><b>Recibo de Compra</b></font>", styles["Normal"])]
+    ]
+    header_table = Table(header_data, colWidths=[300, 200])
+    header_table.setStyle(TableStyle([
+        ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 15),
+    ]))
+    elementos.append(header_table)
+
+    # Info Cliente y Ticket
+    fecha_str = pedido.fecha.strftime("%Y-%m-%d %H:%M") if pedido.fecha else "N/A"
+    info_data = [
+        [Paragraph(f"<b>Acreedor:</b><br/>{usuario.nombre if usuario else 'N/A'}<br/>{usuario.email if usuario else ''}", styles["Normal"]), 
+         Paragraph(f"<b>Ticket M-ORD-{pedido_id}</b><br/>Fecha: {fecha_str}<br/>Estado: {pedido.estado.upper()}", styles["Normal"])]
+    ]
+    info_table = Table(info_data, colWidths=[250, 250])
+    info_table.setStyle(TableStyle([('VALIGN', (0,0), (-1,-1), 'TOP'), ('TOPPADDING', (0,0), (-1,-1), 10)]))
+    elementos.append(info_table)
+    elementos.append(Spacer(1, 20))
+
+    # Productos
+    total = 0
+    tabla_data = [["Producto / Descripción", "Cant.", "Precio U.", "Importe"]]
+    for d in detalles:
+        ap = autopartes.get(d.autoparte_id)
+        if ap:
+            sub = ap.precio * d.cantidad
+            total += sub
+            tabla_data.append([
+                Paragraph(f"<b>{ap.nombre}</b><br/><font size=8>{ap.marca}</font>", styles["Normal"]),
+                f"x{d.cantidad}",
+                f"${ap.precio:,.2f}",
+                f"${sub:,.2f}"
+            ])
+            
+    t = Table(tabla_data, colWidths=[260, 60, 80, 100])
+    t.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#1e293b")),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('PADDING', (0,0), (-1,-1), 10),
+        ('LINEBELOW', (0,1), (-1,-1), 0.5, colors.HexColor("#e2e8f0")),
+        ('ALIGN', (1,0), (-1,-1), 'RIGHT'),
+        ('ALIGN', (0,0), (0,-1), 'LEFT'),
+    ]))
+    elementos.append(t)
+    elementos.append(Spacer(1, 15))
+
+    # Totales
+    total_table = Table([
+        ["Subtotal", f"${total:,.2f}"],
+        ["Envío Vía", f"{pedido.paqueteria if pedido.paqueteria else 'Local'}"],
+        [Paragraph("<b>TOTAL PAGADO</b>", styles["Normal"]), Paragraph(f"<b>${total:,.2f}</b>", styles["Normal"])]
+    ], colWidths=[100, 100])
+    total_table.setStyle(TableStyle([
+        ('ALIGN', (0,0), (-1,-1), 'RIGHT'),
+        ('LINEABOVE', (0,2), (1,2), 1, colors.black),
+        ('TOPPADDING', (0,0), (-1,-1), 5),
+    ]))
+    
+    layout = Table([["", total_table]], colWidths=[300, 200])
+    elementos.append(layout)
+
+    doc.build(elementos)
+    return FileResponse(file_path, media_type="application/pdf", headers={"Content-Disposition": f"inline; filename=\"recibo_orden_{pedido_id}.pdf\""})
+
+
 # ventas excel
 @router.get("/ventas/excel")
-def exportar_ventas_excel(db: Session = Depends(get_db)):
+def exportar_ventas_excel(start_date: Optional[str] = Query(None), end_date: Optional[str] = Query(None), db: Session = Depends(get_db)):
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-    detalles = db.query(DetallePedido).all()
+    query = db.query(DetallePedido).join(Pedido, DetallePedido.pedido_id == Pedido.id)
+    if start_date:
+        query = query.filter(Pedido.fecha >= datetime.fromisoformat(start_date))
+    if end_date:
+        query = query.filter(Pedido.fecha <= datetime.fromisoformat(end_date))
+    detalles = query.all()
     autopartes = {a.id: a for a in db.query(Autoparte).all()}
     data = []
     total_global = 0
@@ -509,7 +682,8 @@ def exportar_ventas_excel(db: Session = Depends(get_db)):
             total_global += total
             data.append({"Autoparte": ap.nombre, "Precio Unit.": ap.precio, "Cant.": d.cantidad, "Subtotal": total})
     df = pd.DataFrame(data)
-    file_path = "/tmp/reporte_ventas.xlsx"
+    import tempfile, os
+    file_path = os.path.join(tempfile.gettempdir(), "reporte_ventas.xlsx")
     df.to_excel(file_path, index=False, startrow=2)
     from openpyxl import load_workbook
     wb = load_workbook(file_path)
@@ -552,10 +726,15 @@ def exportar_ventas_excel(db: Session = Depends(get_db)):
 
 # ventas word
 @router.get("/ventas/word")
-def exportar_ventas_word(db: Session = Depends(get_db)):
+def exportar_ventas_word(start_date: Optional[str] = Query(None), end_date: Optional[str] = Query(None), db: Session = Depends(get_db)):
     from docx.shared import Pt, RGBColor
     from docx.enum.table import WD_TABLE_ALIGNMENT
-    detalles = db.query(DetallePedido).all()
+    query = db.query(DetallePedido).join(Pedido, DetallePedido.pedido_id == Pedido.id)
+    if start_date:
+        query = query.filter(Pedido.fecha >= datetime.fromisoformat(start_date))
+    if end_date:
+        query = query.filter(Pedido.fecha <= datetime.fromisoformat(end_date))
+    detalles = query.all()
     autopartes = {a.id: a for a in db.query(Autoparte).all()}
     doc = Document()
     doc.add_heading("MACUIN AUTOPARTES", 0)
@@ -592,37 +771,45 @@ def exportar_ventas_word(db: Session = Depends(get_db)):
             row[3].text = f"${total:,.2f}"
     doc.add_paragraph("")
     doc.add_heading(f"Ingresos Totales Globales: ${total_global:,.2f}", level=2)
-    file_path = "/tmp/reporte_ventas.docx"
+    import tempfile, os
+    file_path = os.path.join(tempfile.gettempdir(), "reporte_ventas.docx")
     doc.save(file_path)
     return FileResponse(file_path, filename="reporte_ventas.docx")
 
 
 # ventas pdf
 @router.get("/ventas/pdf")
-def exportar_ventas_pdf(db: Session = Depends(get_db)):
-    detalles = db.query(DetallePedido).all()
+def exportar_ventas_pdf(start_date: Optional[str] = Query(None), end_date: Optional[str] = Query(None), db: Session = Depends(get_db)):
+    query = db.query(DetallePedido).join(Pedido, DetallePedido.pedido_id == Pedido.id)
+    if start_date:
+        query = query.filter(Pedido.fecha >= datetime.fromisoformat(start_date))
+    if end_date:
+        query = query.filter(Pedido.fecha <= datetime.fromisoformat(end_date))
+    detalles = query.all()
     autopartes = {a.id: a for a in db.query(Autoparte).all()}
 
-    file_path = "/tmp/reporte_ventas.pdf"
-    doc = SimpleDocTemplate(file_path, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40, title="Reporte de Mas Vendidos", author="MACUIN Autopartes")
+    import tempfile, os
+    file_path = os.path.join(tempfile.gettempdir(), "reporte_ventas.pdf")
+    doc = SimpleDocTemplate(file_path, rightMargin=30, leftMargin=30, topMargin=50, bottomMargin=50, title="Reporte Analítico de Ventas", author="MACUIN Autopartes")
     styles = getSampleStyleSheet()
 
     elementos = []
     
     header_data = [
-        [Paragraph("<b>MACUIN AUTOPARTES</b>", styles["Heading1"]), Paragraph("<font size=12><b>Reporte Analítico: Artículos Vendidos</b></font>", styles["Normal"])]
+        [Paragraph("<font size=24><b>MACUIN</b></font><br/><font color='#b0b0b0' size=10>AUTOPARTES</font>", styles["Normal"]), 
+         Paragraph("<font size=14><b>Reporte Analítico de Ventas</b></font><br/><font color='#888888'>Documento Oficial</font>", styles["Normal"])]
     ]
-    header_table = Table(header_data, colWidths=[200, 300])
+    header_table = Table(header_data, colWidths=[300, 230])
     header_table.setStyle(TableStyle([
         ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
-        ('BACKGROUND', (1, 0), (1, 0), colors.HexColor("#f0f0f0")),
-        ('PADDING', (1, 0), (1, 0), 10),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 15),
     ]))
     elementos.append(header_table)
     elementos.append(Spacer(1, 20))
 
-    elementos.append(Paragraph(f"<b>Operaciones totales registradas:</b> {len(detalles)} movimientos", styles["Normal"]))
-    elementos.append(Spacer(1, 10))
+    elementos.append(Paragraph(f"<font color='#8b5cf6'><b>Operaciones totales registradas:</b></font> {len(detalles)} movimientos", styles["Normal"]))
+    elementos.append(Spacer(1, 15))
 
     tabla_data = [["Autoparte", "Precio Unit.", "Cant.", "Subtotal por Producto"]]
     total_global = 0
@@ -631,27 +818,34 @@ def exportar_ventas_pdf(db: Session = Depends(get_db)):
         if ap:
             total = ap.precio * d.cantidad
             total_global += total
+            
+            detalle = Paragraph(f"<b>{ap.nombre}</b>", styles["Normal"])
+            
             tabla_data.append([
-                ap.nombre,
-                f"${ap.precio:,.2f}",
+                detalle,
+                Paragraph(f"<font color='#64748b'>${ap.precio:,.2f}</font>", styles["Normal"]),
                 f"x{d.cantidad}",
-                f"${total:,.2f}"
+                Paragraph(f"<b>${total:,.2f}</b>", styles["Normal"])
             ])
 
-    t = Table(tabla_data, colWidths=[180, 100, 60, 140])
+    t = Table(tabla_data, colWidths=[240, 100, 60, 130])
     t.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#333333")),
-        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#f8fafc")),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.HexColor("#334155")),
         ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-        ('LINEBELOW', (0,0), (-1,-1), 0.5, colors.HexColor("#e0e0e0")),
-        ('PADDING', (0,0), (-1,-1), 8),
+        ('BOTTOMPADDING', (0,0), (-1,0), 12),
+        ('TOPPADDING', (0,0), (-1,0), 12),
+        ('LINEBELOW', (0,0), (-1,0), 1, colors.HexColor("#e2e8f0")),
         ('ALIGN', (1,1), (-1,-1), 'RIGHT'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('LINEBELOW', (0,1), (-1,-1), 0.5, colors.HexColor("#f1f5f9")),
+        ('PADDING', (0,1), (-1,-1), 10),
     ]))
     elementos.append(t)
-    elementos.append(Spacer(1, 20))
+    elementos.append(Spacer(1, 25))
     
-    elementos.append(Paragraph(f"Ingresos Totales Globales: <b>${total_global:,.2f}</b>", styles["Heading2"]))
+    elementos.append(Paragraph(f"<font size=14>Ingresos Totales Globales:</font> <font size=18 color='#10b981'><b>${total_global:,.2f}</b></font>", styles["Normal"]))
 
     doc.build(elementos)
 
-    return FileResponse(file_path, media_type="application/pdf", headers={"Content-Disposition": "inline; filename=\"reporte_ventas.pdf\""})
+    return FileResponse(file_path, media_type="application/pdf", headers={"Content-Disposition": "inline; filename=\"reporte_ventas_pro.pdf\""})

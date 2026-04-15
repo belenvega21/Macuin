@@ -45,7 +45,13 @@ Route::post('/login', function (Request $request) {
     return back()->withErrors(['email' => 'Credenciales inválidas.']);
 })->name('login');
 
+Route::get('/login', function () {
+    return redirect('/');
+});
+
+
 Route::get('/admin', function () {
+    if (!session('admin_logged')) return redirect('/');
     return view('admin.dashboard');
 })->name('dashboard'); 
 
@@ -182,6 +188,7 @@ Route::put('/inventario/editar/{id}', function (Request $request, $id) {
 Route::get('/pedidos', function () {
     $token = session('jwt_token');
     $response = Http::withToken($token)->get('http://api:8000/pedidos/');
+    \Illuminate\Support\Facades\Log::info("API Pedidos Response: " . $response->status() . " - Count: " . (is_array($response->json()) ? count($response->json()) : 'N/A'));
     $pedidos = $response->successful() ? $response->json() : [];
 
     $resUsuarios = Http::withToken($token)->get('http://api:8000/usuarios/');
@@ -223,6 +230,17 @@ Route::get('/clientes', function () {
 // ========== REPORTES ==========
 Route::get('/reportes', function () {
     return view('admin.reportes');
+});
+
+Route::get('/admin/cuentas', function () {
+    if (!session('admin_logged') || !in_array(session('rol'), ['admin', 'ventas', 'almacen'])) {
+        return redirect('/')->withErrors(['email' => 'Acceso denegado.']);
+    }
+
+    $response = Http::withToken(session('jwt_token'))->get('http://api:8000/usuarios/');
+    $usuarios = $response->successful() ? $response->json() : [];
+
+    return view('admin.cuentas', ['usuarios' => $usuarios]);
 });
 
 // ========== LOGOUT ==========

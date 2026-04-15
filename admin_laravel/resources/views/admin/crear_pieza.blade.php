@@ -167,7 +167,7 @@ class="w-full bg-black/40 border rounded-lg p-3 mt-1 @error('precio') border-red
 <label class="text-sm text-gray-400 mb-2 block">Vista previa de imagen</label>
 <div id="imagenPreview" class="w-40 h-40 bg-black/40 border border-gray-700 rounded-lg flex items-center justify-center overflow-hidden">
 <span class="text-gray-600 text-xs" id="previewPlaceholder">Pega una URL arriba</span>
-<img id="previewImg" src="" class="w-full h-full object-contain hidden p-2" onerror="this.classList.add('hidden');document.getElementById('previewPlaceholder').classList.remove('hidden');">
+<img id="previewImg" src="" class="w-full h-full object-cover rounded-2xl hidden shadow-lg" onerror="this.classList.add('hidden');document.getElementById('previewPlaceholder').classList.remove('hidden');">
 </div>
 </div>
 
